@@ -18,14 +18,17 @@ import {
   CloudUpload,
   Smartphone,
   Settings,
+  Droplet,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { StatusBar, PageHeader } from "../components/Shell";
 import { perfData } from "../data/seed";
 
 const features = [
-  { icon: Building2, label: "ຈັດການຊັບສິນ", color: "#8b5cf6" },
+  { icon: Building2, label: "ຈັດການຊັບສິນ", color: "#8b5cf6", to: "/properties" },
+  { icon: Droplet, label: "ໃສ່ລາຍນ້ຳ", color: "#22c55e", to: "/watermark" },
   { icon: Users, label: "ລູກຄ້າ & Leads", color: "#06b6d4" },
-  { icon: CheckSquare, label: "ຈັດການໜ້າວຽກ", color: "#22c55e" },
+  { icon: CheckSquare, label: "ຈັດການໜ້າວຽກ", color: "#22c55e", to: "/staff" },
   { icon: FileText, label: "ເອກະສານກົດໝາຍ", color: "#a78bfa" },
   { icon: BarChart3, label: "ລາຍງານ & ສະຖິຕິ", color: "#f59e0b" },
   { icon: Calendar, label: "ປະຕິທິນ", color: "#3b82f6" },
@@ -36,6 +39,7 @@ const features = [
 ];
 
 export default function More() {
+  const navigate = useNavigate();
   return (
     <div className="fade-up">
       <StatusBar />
@@ -95,6 +99,7 @@ export default function More() {
           {features.map((f, i) => (
             <button
               key={i}
+              onClick={() => f.to && navigate(f.to)}
               style={{ animationDelay: `${i * 40}ms` }}
               className="card p-3.5 flex items-center gap-3 relative active:scale-95 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/20 fade-up group"
             >

@@ -194,11 +194,18 @@ export default function Staff() {
                   ))}
                 </ul>
                 <button
-                  onClick={() => s.id === "finder" && navigate("/finder")}
+                  onClick={() => {
+                    if (s.id === "finder") navigate("/finder");
+                    else if (s.id === "designer") navigate("/watermark");
+                  }}
                   className="mt-2.5 w-full text-[11px] py-1.5 rounded-lg font-medium text-white active:scale-95 transition-transform hover:brightness-125"
                   style={{ background: `${s.color}33` }}
                 >
-                  {s.id === "finder" ? "ເບິ່ງຊັບທີ່ຄົ້ນພົບ" : "ໄປເຮັດວຽກ"}
+                  {s.id === "finder"
+                    ? "ເບິ່ງຊັບທີ່ຄົ້ນພົບ"
+                    : s.id === "designer"
+                    ? "ໃສ່ລາຍນ້ຳ"
+                    : "ໄປເຮັດວຽກ"}
                 </button>
               </div>
             );

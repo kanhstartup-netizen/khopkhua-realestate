@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Sparkles,
   Search,
+  Droplet,
 } from "lucide-react";
 import { StatusBar, PageHeader } from "../components/Shell";
 import { useStore } from "../context/Store";
@@ -41,7 +42,7 @@ const quick = [
   { icon: Users, label: "ລູກຄ້າ", to: "/more", color: "#ec4899" },
   { icon: Bot, label: "Staff AI", to: "/staff", color: "#8b5cf6", badge: 40 },
   { icon: Megaphone, label: "ການຕະຫລາດ", to: "/staff", color: "#ef4444" },
-  { icon: BarChart3, label: "ລາຍງານ", to: "/more", color: "#22c55e" },
+  { icon: Droplet, label: "ໃສ່ລາຍນ້ຳ", to: "/watermark", color: "#22c55e" },
   { icon: Calendar, label: "ປະຕິທິນ", to: "/more", color: "#3b82f6" },
 ];
 
