@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { Home } from "lucide-react";
 import Logo from "./Logo";
 
-export default function SplashScreen({ onDone, minDuration = 2400 }) {
+// Modern luxury villa at night — close to the demo mockup
+const HOUSE_IMG =
+  "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1000&q=70";
+
+export default function SplashScreen({ onDone, minDuration = 2600 }) {
   const [progress, setProgress] = useState(0);
   const [leaving, setLeaving] = useState(false);
 
@@ -14,87 +18,89 @@ export default function SplashScreen({ onDone, minDuration = 2400 }) {
       if (pct >= 100) {
         clearInterval(tick);
         setLeaving(true);
-        setTimeout(onDone, 450);
+        setTimeout(onDone, 500);
       }
-    }, 50);
+    }, 40);
     return () => clearInterval(tick);
   }, [minDuration, onDone]);
 
   return (
     <div
-      className={`fixed inset-0 z-[999] flex flex-col items-center overflow-hidden transition-opacity duration-500 ${
+      className={`fixed inset-0 z-[999] overflow-hidden transition-opacity duration-500 ${
         leaving ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
-      style={{ background: "linear-gradient(180deg, #060b18 0%, #081026 45%, #060a16 100%)" }}
+      style={{ background: "#04101f" }}
     >
-      {/* faint vertical light beams like skyline */}
-      <div className="absolute top-10 left-10 w-px h-40 bg-gradient-to-b from-cyan-400/40 to-transparent" />
-      <div className="absolute top-24 right-14 w-px h-28 bg-gradient-to-b from-cyan-400/30 to-transparent" />
-      <div className="absolute top-6 right-28 w-px h-20 bg-gradient-to-b from-cyan-400/20 to-transparent" />
+      {/* Full-bleed night house photo, anchored lower half */}
+      <div
+        className="absolute inset-x-0 bottom-0 top-[42%] bg-cover bg-center"
+        style={{ backgroundImage: `url('${HOUSE_IMG}')` }}
+      />
+      {/* Deep blue gradient overlays to blend the photo into the dark top */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, #04101f 0%, #051428 30%, rgba(5,20,40,0.55) 52%, rgba(4,16,31,0.25) 72%, rgba(4,16,31,0.9) 100%)",
+        }}
+      />
+      {/* subtle skyline light beams */}
+      <div className="absolute top-[44%] left-6 w-px h-24 bg-gradient-to-b from-cyan-300/50 to-transparent" />
+      <div className="absolute top-[40%] right-10 w-px h-16 bg-gradient-to-b from-cyan-300/40 to-transparent" />
+      <div className="absolute top-[47%] right-24 w-px h-10 bg-gradient-to-b from-cyan-300/30 to-transparent" />
+      <span className="absolute top-[40%] left-10 w-1 h-1 rounded-full bg-cyan-300/70 animate-pulse" />
+      <span className="absolute top-[46%] right-16 w-1 h-1 rounded-full bg-cyan-300/60 animate-pulse" />
 
-      <div className="flex flex-col items-center pt-16 px-8 relative z-10">
-        <div className="animate-float">
-          <Logo size={104} glow />
-        </div>
-
-        <h1 className="text-white text-[28px] font-extrabold tracking-tight mt-4 leading-tight text-center">
-          Khopkhua
-          <br />
-          <span className="gradient-text">Realestate</span>
-        </h1>
-        <p className="text-white/55 text-sm mt-3 text-center leading-snug">
-          Smart Real Estate
-          <br />
-          Management System
-        </p>
-
-        <div className="w-10 h-px bg-gradient-to-r from-transparent via-gold to-transparent my-4 opacity-60" />
-
-        <p className="text-sm text-center">
-          <span className="text-white/85">Manage. Connect. </span>
-          <span className="text-gold font-semibold">Grow.</span>
-        </p>
-      </div>
-
-      {/* House photo */}
-      <div className="relative w-full flex-1 mt-6 min-h-[210px]">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1613977257363-707ba9348227?w=900&q=65')",
-          }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(6,10,22,0) 0%, rgba(6,10,22,0.2) 55%, #060a16 100%)",
-          }}
-        />
-      </div>
-
-      {/* Loading bar + footer */}
-      <div className="w-full px-10 pb-10 relative z-10 -mt-2">
-        <p className="text-center text-white/80 text-sm mb-2">ກຳລັງໂຫລດ... Loading</p>
-        <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-100"
-            style={{
-              width: `${progress}%`,
-              background: "linear-gradient(90deg, #19c37d, #34d399)",
-              boxShadow: "0 0 12px rgba(52,211,153,0.6)",
-            }}
-          />
-        </div>
-        <p className="text-center text-brand-400 font-bold text-lg mt-2">{progress}%</p>
-
-        <div className="flex flex-col items-center mt-4">
-          <div className="w-11 h-11 rounded-full bg-brand-600/15 border border-brand-400/30 flex items-center justify-center">
-            <Home size={20} className="text-brand-400" />
+      {/* Content */}
+      <div className="relative h-full flex flex-col items-center">
+        {/* Top: logo + titles */}
+        <div className="flex flex-col items-center pt-[12%] px-8 text-center">
+          <div className="animate-float">
+            <Logo size={120} glow />
           </div>
-          <p className="text-white/40 text-[11px] mt-2 text-center">
-            ສ້າງການເຊື່ອມຕໍ່ທີ່ດີກວ່າ ໃນວົງການອະສັງຫາ
+
+          <h1 className="text-white text-[34px] font-extrabold tracking-tight mt-4 leading-[1.05]">
+            Khopkhua
+            <br />
+            <span className="gradient-text">Realestate</span>
+          </h1>
+
+          <p className="text-white/65 text-[15px] mt-4 leading-snug">
+            Smart Real Estate
+            <br />
+            Management System
+          </p>
+
+          <div className="w-16 h-px bg-gradient-to-r from-transparent via-gold/70 to-transparent my-5" />
+
+          <p className="text-[15px] font-medium">
+            <span className="text-white/90">Manage. Connect. </span>
+            <span className="text-gold">Grow.</span>
+          </p>
+        </div>
+
+        {/* Bottom: loading area */}
+        <div className="mt-auto w-full px-12 pb-10 flex flex-col items-center">
+          <p className="text-white/90 text-lg font-medium mb-3">Loading...</p>
+          <div className="h-2.5 w-full rounded-full bg-white/15 overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-75"
+              style={{
+                width: `${progress}%`,
+                background: "linear-gradient(90deg, #19c37d, #34d399)",
+                boxShadow: "0 0 14px rgba(52,211,153,0.7)",
+              }}
+            />
+          </div>
+          <p className="text-brand-400 font-bold text-xl mt-3">{progress}%</p>
+
+          <div className="w-12 h-12 rounded-full bg-brand-500/15 border border-brand-400/30 flex items-center justify-center mt-5">
+            <Home size={22} className="text-brand-400" />
+          </div>
+          <p className="text-white/45 text-[13px] mt-3 text-center leading-snug">
+            Building better connections
+            <br />
+            in real estate
           </p>
         </div>
       </div>
