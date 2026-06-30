@@ -9,6 +9,7 @@ import Staff from "./pages/Staff";
 import AddProperty from "./pages/AddProperty";
 import More from "./pages/More";
 import Finder from "./pages/Finder";
+import Watermark from "./pages/Watermark";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -30,6 +31,7 @@ export default function App() {
             <Route path="/properties" element={<Properties />} />
             <Route path="/staff" element={<Staff />} />
             <Route path="/finder" element={<Finder />} />
+            <Route path="/watermark" element={<Watermark />} />
             <Route path="/add" element={<AddProperty />} />
             <Route path="/more" element={<More />} />
           </Routes>
