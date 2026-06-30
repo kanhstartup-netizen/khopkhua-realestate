@@ -87,4 +87,12 @@ export const TEMPLATES = [
     bg: "rgba(6,16,30,0.82)",
     text: "#ffffff",
   },
+  {
+    id: "t11",
+    name: "ປິດການຂາຍ (SOLD)",
+    style: "sold",
+    accent: "#ef4444",
+    bg: "rgba(6,16,30,0.82)",
+    text: "#ffffff",
+  },
 ];
