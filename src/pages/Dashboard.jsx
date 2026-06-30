@@ -1,20 +1,18 @@
 import { useNavigate } from "react-router-dom";
 import {
-  Bell,
   Building2,
   Users,
   CheckSquare,
   TrendingUp,
   TrendingDown,
-  Home as HomeIcon,
   Bot,
   Megaphone,
   BarChart3,
   Calendar,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
-import { StatusBar } from "../components/Shell";
-import Logo from "../components/Logo";
+import { StatusBar, PageHeader } from "../components/Shell";
 import { useStore } from "../context/Store";
 import { fmtLAK } from "../data/seed";
 
@@ -54,28 +52,19 @@ export default function Dashboard() {
   return (
     <div className="fade-up">
       <StatusBar />
-      {/* Header */}
-      <div className="px-5 pt-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Logo size={40} />
-          <div>
-            <p className="text-xs text-white/55">ຍິນດີຕ້ອນຮັບກັບມາ,</p>
-            <p className="font-bold text-white text-lg">ທີມ Khopkhua 👋</p>
-          </div>
-        </div>
-        <button className="relative" aria-label="ການແຈ້ງເຕືອນ">
-          <Bell size={22} className="text-white/80" />
-          <span className="absolute -top-1 -right-1 bg-rose-500 text-[9px] w-4 h-4 rounded-full flex items-center justify-center">
-            12
-          </span>
-        </button>
-      </div>
+      <PageHeader subtitle="ຍິນດີຕ້ອນຮັບກັບມາ," title="ທີມ Khopkhua 👋" />
 
       {/* Overview */}
       <div className="px-5 mt-4">
-        <div className="card p-4">
-          <p className="text-xs text-white/55 mb-3">ພາບລວມ</p>
-          <div className="grid grid-cols-4 gap-2">
+        <div className="card p-4 relative overflow-hidden">
+          <div
+            className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-20 blur-2xl"
+            style={{ background: "radial-gradient(circle, #8b5cf6, transparent 70%)" }}
+          />
+          <p className="text-xs text-white/55 mb-3 relative flex items-center gap-1.5">
+            <Sparkles size={12} className="text-gold" /> ພາບລວມ
+          </p>
+          <div className="grid grid-cols-4 gap-2 relative">
             <Stat value={properties.length} label="ຊັບສິນ" delta="12%" />
             <Stat value="196" label="Leads" delta="8%" />
             <Stat value="84" label="ດີລ" delta="16%" />
@@ -95,14 +84,20 @@ export default function Dashboard() {
             <button
               key={i}
               onClick={() => navigate(q.to)}
-              className="card py-3 flex flex-col items-center gap-2 relative active:scale-95 transition-transform"
+              style={{ animationDelay: `${i * 45}ms` }}
+              className="card py-3 flex flex-col items-center gap-2 relative active:scale-90 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/20 fade-up group"
             >
               {q.badge && (
                 <span className="absolute top-1.5 right-1.5 bg-violet-600 text-[8px] px-1.5 rounded-full">
                   {q.badge}
                 </span>
               )}
-              <q.icon size={22} style={{ color: q.color }} />
+              <span
+                className="w-9 h-9 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 group-active:scale-95"
+                style={{ background: `${q.color}1f` }}
+              >
+                <q.icon size={19} style={{ color: q.color }} />
+              </span>
               <span className="text-[10px] text-white/70">{q.label}</span>
             </button>
           ))}
@@ -123,7 +118,7 @@ export default function Dashboard() {
         {recent && (
           <button
             onClick={() => navigate("/properties")}
-            className="card p-3 w-full flex items-center gap-3 text-left active:scale-[0.99] transition"
+            className="card p-3 w-full flex items-center gap-3 text-left active:scale-[0.98] transition hover:border-white/20"
           >
             <img
               src={recent.img}

@@ -47,14 +47,20 @@ export default function Staff() {
     <div className="fade-up">
       <StatusBar />
       <div className="px-5 pt-4 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} aria-label="ກັບຄືນ">
-          <ChevronLeft size={22} className="text-white/80" />
+        <button
+          onClick={() => navigate(-1)}
+          aria-label="ກັບຄືນ"
+          className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 active:scale-90 transition-all"
+        >
+          <ChevronLeft size={20} className="text-white/80" />
         </button>
         <div className="text-center flex-1">
           <h1 className="text-lg font-bold text-white">Staff AI</h1>
-          <p className="text-[11px] text-brand-400">ອອນລາຍ 24/7</p>
+          <p className="text-[11px] text-brand-400 flex items-center justify-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse" /> ອອນລາຍ 24/7
+          </p>
         </div>
-        <div className="w-6" />
+        <div className="w-8" />
       </div>
 
       {/* Robot hero */}
@@ -84,9 +90,9 @@ export default function Staff() {
       <div className="px-5 mt-4">
         <button
           onClick={() => setAdding((v) => !v)}
-          className="w-full gradient-btn py-3 rounded-2xl flex items-center justify-center gap-2 font-semibold text-white shadow-glow"
+          className="w-full gradient-btn py-3 rounded-2xl flex items-center justify-center gap-2 font-semibold text-white shadow-glow active:scale-95 hover:brightness-110 transition-all"
         >
-          <Plus size={20} /> ສ້າງໜ້າວຽກໃໝ່
+          <Plus size={20} className={`transition-transform ${adding ? "rotate-45" : ""}`} /> ສ້າງໜ້າວຽກໃໝ່
         </button>
       </div>
 
@@ -141,13 +147,17 @@ export default function Staff() {
       <div className="px-5 mt-5">
         <p className="font-semibold text-white mb-3">ໜ່ວຍງານ AI</p>
         <div className="grid grid-cols-2 gap-3">
-          {aiStaff.map((s) => {
+          {aiStaff.map((s, i) => {
             const Icon = Icons[s.icon] || Bot;
             return (
-              <div key={s.id} className="card p-3">
+              <div
+                key={s.id}
+                style={{ animationDelay: `${i * 50}ms` }}
+                className="card p-3 fade-up hover:-translate-y-0.5 hover:border-white/20 transition-all duration-200 group"
+              >
                 <div className="flex items-center gap-2 mb-2">
                   <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center"
+                    className="w-9 h-9 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
                     style={{ background: `${s.color}22` }}
                   >
                     <Icon size={18} style={{ color: s.color }} />
@@ -167,7 +177,7 @@ export default function Staff() {
                   ))}
                 </ul>
                 <button
-                  className="mt-2.5 w-full text-[11px] py-1.5 rounded-lg font-medium text-white"
+                  className="mt-2.5 w-full text-[11px] py-1.5 rounded-lg font-medium text-white active:scale-95 transition-transform hover:brightness-125"
                   style={{ background: `${s.color}33` }}
                 >
                   ໄປເຮັດວຽກ

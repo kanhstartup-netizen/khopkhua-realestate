@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Search, SlidersHorizontal, Bell, ChevronRight, Bed, Bath, Trash2 } from "lucide-react";
-import { StatusBar } from "../components/Shell";
-import Logo from "../components/Logo";
+import { Search, SlidersHorizontal, ChevronRight, Bed, Bath, Trash2 } from "lucide-react";
+import { StatusBar, PageHeader } from "../components/Shell";
 import { useStore } from "../context/Store";
 import { fmtLAK } from "../data/seed";
 
@@ -14,10 +12,10 @@ const tabs = [
 ];
 
 export default function Properties() {
-  const navigate = useNavigate();
   const { properties, removeProperty } = useStore();
   const [tab, setTab] = useState("all");
   const [q, setQ] = useState("");
+  const [focused, setFocused] = useState(false);
 
   const filtered = properties.filter((p) => {
     const matchTab = tab === "all" || p.type === tab;
@@ -34,29 +32,26 @@ export default function Properties() {
   return (
     <div className="fade-up">
       <StatusBar />
-      <div className="px-5 pt-4 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <Logo size={30} />
-          <h1 className="text-xl font-bold text-white">ຊັບສິນ</h1>
-        </div>
-        <button className="relative" aria-label="ການແຈ້ງເຕືອນ">
-          <Bell size={20} className="text-white/80" />
-          <span className="absolute -top-1 -right-1 bg-rose-500 w-2.5 h-2.5 rounded-full" />
-        </button>
-      </div>
+      <PageHeader title="ຊັບສິນ" badge={0} />
 
       {/* Search */}
       <div className="px-5 mt-4 flex gap-2">
-        <div className="card flex-1 flex items-center gap-2 px-3">
-          <Search size={18} className="text-white/40" />
+        <div
+          className={`card flex-1 flex items-center gap-2 px-3 transition-colors ${
+            focused ? "border-violet-500/60" : ""
+          }`}
+        >
+          <Search size={18} className={focused ? "text-violet-400" : "text-white/40"} />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             placeholder="ຄົ້ນຫາ ທຳເລ, ເຈົ້າຂອງ, ປະເພດ..."
             className="bg-transparent py-3 text-sm w-full outline-none text-white placeholder:text-white/40"
           />
         </div>
-        <button className="gradient-btn w-11 rounded-2xl flex items-center justify-center" aria-label="ກັ່ນຕອງ">
+        <button className="gradient-btn w-11 rounded-2xl flex items-center justify-center active:scale-90 transition-transform shadow-glow" aria-label="ກັ່ນຕອງ">
           <SlidersHorizontal size={18} className="text-white" />
         </button>
       </div>
@@ -67,10 +62,10 @@ export default function Properties() {
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-medium transition ${
+            className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 active:scale-95 ${
               tab === t.key
-                ? "gradient-btn text-white"
-                : "card text-white/60"
+                ? "gradient-btn text-white shadow-glow scale-105"
+                : "card text-white/60 hover:text-white/85"
             }`}
           >
             {t.label} ({count(t.key)})
@@ -80,8 +75,12 @@ export default function Properties() {
 
       {/* List */}
       <div className="px-5 mt-4 space-y-3">
-        {filtered.map((p) => (
-          <div key={p.id} className="card p-3 flex gap-3">
+        {filtered.map((p, i) => (
+          <div
+            key={p.id}
+            style={{ animationDelay: `${i * 50}ms` }}
+            className="card p-3 flex gap-3 fade-up hover:border-white/20 hover:-translate-y-0.5 transition-all duration-200"
+          >
             <img
               src={p.img}
               alt={p.name}
@@ -118,7 +117,7 @@ export default function Properties() {
               </div>
               <button
                 onClick={() => removeProperty(p.id)}
-                className="text-[10px] text-rose-400/70 flex items-center gap-1 mt-1"
+                className="text-[10px] text-rose-400/70 flex items-center gap-1 mt-1 active:scale-95 transition-transform"
               >
                 <Trash2 size={11} /> ລຶບ
               </button>

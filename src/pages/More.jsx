@@ -19,8 +19,7 @@ import {
   Smartphone,
   Settings,
 } from "lucide-react";
-import { StatusBar } from "../components/Shell";
-import Logo from "../components/Logo";
+import { StatusBar, PageHeader } from "../components/Shell";
 import { perfData } from "../data/seed";
 
 const features = [
@@ -40,13 +39,7 @@ export default function More() {
   return (
     <div className="fade-up">
       <StatusBar />
-      <div className="px-5 pt-4 flex items-center gap-3">
-        <Logo size={36} />
-        <div>
-          <h1 className="text-lg font-bold text-white">ເພີ່ມເຕີມ</h1>
-          <p className="text-[11px] text-white/55">Khopkhua Realestate</p>
-        </div>
-      </div>
+      <PageHeader subtitle="Khopkhua Realestate" title="ເພີ່ມເຕີມ" badge={0} />
 
       {/* Performance */}
       <div className="px-5 mt-4">
@@ -102,10 +95,11 @@ export default function More() {
           {features.map((f, i) => (
             <button
               key={i}
-              className="card p-3.5 flex items-center gap-3 relative active:scale-95 transition"
+              style={{ animationDelay: `${i * 40}ms` }}
+              className="card p-3.5 flex items-center gap-3 relative active:scale-95 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/20 fade-up group"
             >
               <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 group-hover:rotate-3"
                 style={{ background: `${f.color}22` }}
               >
                 <f.icon size={20} style={{ color: f.color }} />
