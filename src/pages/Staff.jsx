@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, Plus, Bot } from "lucide-react";
+import { ChevronLeft, Plus, Bot, Search, ChevronRight } from "lucide-react";
 import * as Icons from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { StatusBar } from "../components/Shell";
@@ -126,6 +126,23 @@ export default function Staff() {
         </div>
       )}
 
+      {/* Property Finder shortcut */}
+      <div className="px-5 mt-3">
+        <button
+          onClick={() => navigate("/finder")}
+          className="w-full card p-3.5 flex items-center gap-3 active:scale-[0.98] hover:border-brand-400/40 transition-all text-left"
+        >
+          <div className="w-11 h-11 rounded-2xl bg-brand-500/15 flex items-center justify-center">
+            <Search size={22} className="text-brand-400" />
+          </div>
+          <div className="flex-1">
+            <p className="text-white font-semibold text-sm">ທີມຄົ້ນຫາຊັບສິນ</p>
+            <p className="text-[11px] text-white/55">ເບິ່ງຊັບທີ່ AI ຄົ້ນພົບ ແລະ ອະນຸມັດເຂົ້າແອັບ</p>
+          </div>
+          <ChevronRight size={18} className="text-white/40" />
+        </button>
+      </div>
+
       {/* Task progress */}
       <div className="px-5 mt-5">
         <div className="flex items-center justify-between mb-3">
@@ -177,10 +194,11 @@ export default function Staff() {
                   ))}
                 </ul>
                 <button
+                  onClick={() => s.id === "finder" && navigate("/finder")}
                   className="mt-2.5 w-full text-[11px] py-1.5 rounded-lg font-medium text-white active:scale-95 transition-transform hover:brightness-125"
                   style={{ background: `${s.color}33` }}
                 >
-                  ໄປເຮັດວຽກ
+                  {s.id === "finder" ? "ເບິ່ງຊັບທີ່ຄົ້ນພົບ" : "ໄປເຮັດວຽກ"}
                 </button>
               </div>
             );

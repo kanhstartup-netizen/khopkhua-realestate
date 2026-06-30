@@ -11,6 +11,7 @@ import {
   Calendar,
   ChevronRight,
   Sparkles,
+  Search,
 } from "lucide-react";
 import { StatusBar, PageHeader } from "../components/Shell";
 import { useStore } from "../context/Store";
@@ -35,7 +36,7 @@ function Stat({ value, label, delta, up = true }) {
 
 const quick = [
   { icon: Building2, label: "ຊັບສິນ", to: "/properties", color: "#10b981" },
-  { icon: Users, label: "ລູກຄ້າ", to: "/more", color: "#06b6d4" },
+  { icon: Search, label: "ຄົ້ນຫາຊັບ", to: "/finder", color: "#06b6d4" },
   { icon: CheckSquare, label: "ໜ້າວຽກ", to: "/staff", color: "#f59e0b" },
   { icon: Users, label: "ລູກຄ້າ", to: "/more", color: "#ec4899" },
   { icon: Bot, label: "Staff AI", to: "/staff", color: "#8b5cf6", badge: 40 },
