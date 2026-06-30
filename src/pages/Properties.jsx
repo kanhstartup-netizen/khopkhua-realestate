@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, SlidersHorizontal, Bell, ChevronRight, Bed, Bath, Trash2 } from "lucide-react";
 import { StatusBar } from "../components/Shell";
+import Logo from "../components/Logo";
 import { useStore } from "../context/Store";
 import { fmtLAK } from "../data/seed";
 
@@ -34,7 +35,10 @@ export default function Properties() {
     <div className="fade-up">
       <StatusBar />
       <div className="px-5 pt-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-white">ຊັບສິນ</h1>
+        <div className="flex items-center gap-2.5">
+          <Logo size={30} />
+          <h1 className="text-xl font-bold text-white">ຊັບສິນ</h1>
+        </div>
         <button className="relative" aria-label="ການແຈ້ງເຕືອນ">
           <Bell size={20} className="text-white/80" />
           <span className="absolute -top-1 -right-1 bg-rose-500 w-2.5 h-2.5 rounded-full" />
