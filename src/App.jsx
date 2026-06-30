@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import { StoreProvider } from "./context/Store";
 import { PhoneShell, BottomNav } from "./components/Shell";
+import SplashScreen from "./components/SplashScreen";
 import Dashboard from "./pages/Dashboard";
 import Properties from "./pages/Properties";
 import Staff from "./pages/Staff";
@@ -8,6 +10,16 @@ import AddProperty from "./pages/AddProperty";
 import More from "./pages/More";
 
 export default function App() {
+  const [loading, setLoading] = useState(true);
+
+  if (loading) {
+    return (
+      <PhoneShell>
+        <SplashScreen onDone={() => setLoading(false)} />
+      </PhoneShell>
+    );
+  }
+
   return (
     <StoreProvider>
       <HashRouter>
