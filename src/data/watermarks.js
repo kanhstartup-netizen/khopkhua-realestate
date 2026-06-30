@@ -1,0 +1,90 @@
+// ຂໍ້ມູນທີມ ສຳລັບ watermark
+export const BRAND = {
+  nameLao: "ຄອບຄົວ ອະສັງຫາ",
+  nameEn: "Khopkhua Real estate",
+  phones: ["020 55355 347", "020 9169 4499"],
+};
+
+// 10 ຮູບແບບ watermark — ແຕ່ລະອັນກຳນົດ ສີ, ຕຳແໜ່ງ, ສະໄຕລ໌
+export const TEMPLATES = [
+  {
+    id: "t1",
+    name: "ແຖບລຸ່ມ ຄຳ-ຂຽວ",
+    style: "bottomBar",
+    accent: "#e8b840",
+    bg: "rgba(6,16,30,0.78)",
+    text: "#ffffff",
+  },
+  {
+    id: "t2",
+    name: "ແຖບລຸ່ມ ມ່ວງ",
+    style: "bottomBar",
+    accent: "#a78bfa",
+    bg: "rgba(20,10,40,0.78)",
+    text: "#ffffff",
+  },
+  {
+    id: "t3",
+    name: "ກ່ອງມຸມຂວາລຸ່ມ",
+    style: "cornerCard",
+    accent: "#34d399",
+    bg: "rgba(6,16,30,0.85)",
+    text: "#ffffff",
+  },
+  {
+    id: "t4",
+    name: "ແຖບເທິງ ໂປ່ງໃສ",
+    style: "topBar",
+    accent: "#e8b840",
+    bg: "rgba(6,16,30,0.55)",
+    text: "#ffffff",
+  },
+  {
+    id: "t5",
+    name: "ກາງຮູບ ໂປ່ງໃສ",
+    style: "centerStamp",
+    accent: "#ffffff",
+    bg: "rgba(0,0,0,0)",
+    text: "#ffffff",
+  },
+  {
+    id: "t6",
+    name: "ມຸມຊ້າຍເທິງ",
+    style: "topLeftBadge",
+    accent: "#34d399",
+    bg: "rgba(6,16,30,0.8)",
+    text: "#ffffff",
+  },
+  {
+    id: "t7",
+    name: "ກອບເຕັມຮູບ",
+    style: "fullFrame",
+    accent: "#e8b840",
+    bg: "rgba(6,16,30,0.0)",
+    text: "#ffffff",
+  },
+  {
+    id: "t8",
+    name: "ແຖບລຸ່ມ ໄລ່ສີ",
+    style: "gradientBar",
+    accent: "#ffffff",
+    bg: "linear",
+    text: "#ffffff",
+  },
+  {
+    id: "t9",
+    name: "ໂລໂກ້ໃຫຍ່ກາງ",
+    style: "bigLogoCenter",
+    accent: "#e8b840",
+    bg: "rgba(0,0,0,0.0)",
+    text: "#ffffff",
+  },
+  {
+    id: "t10",
+    name: "ມືອາຊີບ ສອງແຖບ",
+    style: "proSplit",
+    accent: "#e8b840",
+    bg: "rgba(6,16,30,0.82)",
+    text: "#ffffff",
+  },
+];
