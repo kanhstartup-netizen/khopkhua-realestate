@@ -41,10 +41,32 @@ export default function Watermark() {
   const [logo, setLogo] = useState(null);
   const [tpl, setTpl] = useState(TEMPLATES[0]);
   const [downloaded, setDownloaded] = useState(false);
+  const [fontReady, setFontReady] = useState(false);
 
   // preload logo
   useEffect(() => {
     loadImg(LOGO_SRC).then(setLogo).catch(() => {});
+  }, []);
+
+  // Ensure Noto Sans Lao is loaded before drawing on canvas
+  useEffect(() => {
+    let alive = true;
+    const fams = [
+      "400 48px 'Noto Sans Lao'",
+      "600 48px 'Noto Sans Lao'",
+      "700 48px 'Noto Sans Lao'",
+    ];
+    if (document.fonts && document.fonts.load) {
+      Promise.all(fams.map((f) => document.fonts.load(f)))
+        .then(() => document.fonts.ready)
+        .then(() => alive && setFontReady(true))
+        .catch(() => alive && setFontReady(true));
+    } else {
+      setFontReady(true);
+    }
+    return () => {
+      alive = false;
+    };
   }, []);
 
   const onUpload = (e) => {
@@ -81,7 +103,7 @@ export default function Watermark() {
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, W, H);
       ctx.fillStyle = "rgba(255,255,255,0.25)";
-      ctx.font = `500 ${Math.round(W * 0.03)}px sans-serif`;
+      ctx.font = `500 ${Math.round(W * 0.03)}px 'Noto Sans Lao', sans-serif`;
       ctx.textAlign = "center";
       ctx.fillText("ອັບໂຫລດຮູບ ເພື່ອເບິ່ງຕົວຢ່າງ", W / 2, H / 2);
       ctx.textAlign = "left";
@@ -112,12 +134,12 @@ export default function Watermark() {
       const tx = pad + logoSize + pad * 0.6;
       ctx.textBaseline = "middle";
       ctx.fillStyle = s.accent;
-      ctx.font = `700 ${Math.round(barH * 0.26)}px sans-serif`;
+      ctx.font = `700 ${Math.round(barH * 0.26)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText(BRAND.nameLao, tx, y + barH * 0.34);
       ctx.fillStyle = s.text;
-      ctx.font = `600 ${Math.round(barH * 0.2)}px sans-serif`;
+      ctx.font = `600 ${Math.round(barH * 0.2)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText(BRAND.nameEn, tx, y + barH * 0.62);
-      ctx.font = `500 ${Math.round(barH * 0.18)}px sans-serif`;
+      ctx.font = `500 ${Math.round(barH * 0.18)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillStyle = "rgba(255,255,255,0.85)";
       ctx.fillText("☎ " + phoneText, tx, y + barH * 0.85);
     }
@@ -135,11 +157,11 @@ export default function Watermark() {
       const tx = pad + logoSize + pad * 0.6;
       ctx.textBaseline = "middle";
       ctx.fillStyle = "#fff";
-      ctx.font = `700 ${Math.round(barH * 0.26)}px sans-serif`;
+      ctx.font = `700 ${Math.round(barH * 0.26)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText(BRAND.nameLao, tx, y + barH * 0.34);
-      ctx.font = `600 ${Math.round(barH * 0.2)}px sans-serif`;
+      ctx.font = `600 ${Math.round(barH * 0.2)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText(BRAND.nameEn, tx, y + barH * 0.62);
-      ctx.font = `500 ${Math.round(barH * 0.18)}px sans-serif`;
+      ctx.font = `500 ${Math.round(barH * 0.18)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText("☎ " + phoneText, tx, y + barH * 0.85);
     }
 
@@ -159,12 +181,12 @@ export default function Watermark() {
       const tx = x + pad * 0.5 + logoSize + 14;
       ctx.textBaseline = "middle";
       ctx.fillStyle = s.accent;
-      ctx.font = `700 ${Math.round(ch * 0.22)}px sans-serif`;
+      ctx.font = `700 ${Math.round(ch * 0.22)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText(BRAND.nameLao, tx, y + ch * 0.32);
       ctx.fillStyle = "#fff";
-      ctx.font = `600 ${Math.round(ch * 0.17)}px sans-serif`;
+      ctx.font = `600 ${Math.round(ch * 0.17)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText(BRAND.nameEn, tx, y + ch * 0.56);
-      ctx.font = `500 ${Math.round(ch * 0.15)}px sans-serif`;
+      ctx.font = `500 ${Math.round(ch * 0.15)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillStyle = "rgba(255,255,255,0.85)";
       ctx.fillText(BRAND.phones[0], tx, y + ch * 0.78);
       ctx.fillText(BRAND.phones[1], tx + Math.round(cw * 0.42), y + ch * 0.78);
@@ -185,12 +207,12 @@ export default function Watermark() {
       const tx = x + 20 + logoSize + 14;
       ctx.textBaseline = "middle";
       ctx.fillStyle = s.accent;
-      ctx.font = `700 ${Math.round(ch * 0.24)}px sans-serif`;
+      ctx.font = `700 ${Math.round(ch * 0.24)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText(BRAND.nameLao, tx, y + ch * 0.34);
       ctx.fillStyle = "#fff";
-      ctx.font = `600 ${Math.round(ch * 0.18)}px sans-serif`;
+      ctx.font = `600 ${Math.round(ch * 0.18)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText(BRAND.nameEn, tx, y + ch * 0.58);
-      ctx.font = `500 ${Math.round(ch * 0.16)}px sans-serif`;
+      ctx.font = `500 ${Math.round(ch * 0.16)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillStyle = "rgba(255,255,255,0.85)";
       ctx.fillText("☎ " + phoneText, tx, y + ch * 0.82);
     }
@@ -205,11 +227,11 @@ export default function Watermark() {
       ctx.shadowColor = "rgba(0,0,0,0.6)";
       ctx.shadowBlur = 12;
       ctx.fillStyle = s.accent;
-      ctx.font = `700 ${Math.round(W * 0.05)}px sans-serif`;
+      ctx.font = `700 ${Math.round(W * 0.05)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText(BRAND.nameLao, W / 2, H * 0.46);
-      ctx.font = `600 ${Math.round(W * 0.038)}px sans-serif`;
+      ctx.font = `600 ${Math.round(W * 0.038)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText(BRAND.nameEn, W / 2, H * 0.53);
-      ctx.font = `500 ${Math.round(W * 0.03)}px sans-serif`;
+      ctx.font = `500 ${Math.round(W * 0.03)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText("☎ " + phoneText, W / 2, H * 0.6);
       ctx.shadowBlur = 0;
       ctx.textAlign = "left";
@@ -230,12 +252,12 @@ export default function Watermark() {
       const tx = m + 20 + logoSize + 16;
       ctx.textBaseline = "middle";
       ctx.fillStyle = s.accent;
-      ctx.font = `700 ${Math.round(barH * 0.3)}px sans-serif`;
+      ctx.font = `700 ${Math.round(barH * 0.3)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText(BRAND.nameLao + "  ", tx, y + barH * 0.36);
       ctx.fillStyle = "#fff";
-      ctx.font = `600 ${Math.round(barH * 0.22)}px sans-serif`;
+      ctx.font = `600 ${Math.round(barH * 0.22)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText(BRAND.nameEn, tx, y + barH * 0.66);
-      ctx.font = `500 ${Math.round(barH * 0.2)}px sans-serif`;
+      ctx.font = `500 ${Math.round(barH * 0.2)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillStyle = "rgba(255,255,255,0.85)";
       ctx.textAlign = "right";
       ctx.fillText("☎ " + phoneText, W - m - 24, y + barH * 0.5);
@@ -258,9 +280,9 @@ export default function Watermark() {
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillStyle = "#fff";
-      ctx.font = `700 ${Math.round(barH * 0.32)}px sans-serif`;
+      ctx.font = `700 ${Math.round(barH * 0.32)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText(`${BRAND.nameLao}  |  ${BRAND.nameEn}`, W / 2, y + barH * 0.36);
-      ctx.font = `500 ${Math.round(barH * 0.26)}px sans-serif`;
+      ctx.font = `500 ${Math.round(barH * 0.26)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillStyle = s.accent;
       ctx.fillText("☎ " + phoneText, W / 2, y + barH * 0.72);
       ctx.textAlign = "left";
@@ -279,23 +301,78 @@ export default function Watermark() {
       const tx = pad + logoSize + pad * 0.6;
       ctx.textBaseline = "middle";
       ctx.fillStyle = s.accent;
-      ctx.font = `700 ${Math.round(barH * 0.28)}px sans-serif`;
+      ctx.font = `700 ${Math.round(barH * 0.28)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText(BRAND.nameLao, tx, y + barH * 0.36);
       ctx.fillStyle = "#fff";
-      ctx.font = `600 ${Math.round(barH * 0.2)}px sans-serif`;
+      ctx.font = `600 ${Math.round(barH * 0.2)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText(BRAND.nameEn, tx, y + barH * 0.64);
       // phone block on right
       ctx.textAlign = "right";
       ctx.fillStyle = s.accent;
-      ctx.font = `700 ${Math.round(barH * 0.2)}px sans-serif`;
+      ctx.font = `700 ${Math.round(barH * 0.2)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText("ໂທ / Tel", W - pad, y + barH * 0.32);
       ctx.fillStyle = "#fff";
-      ctx.font = `600 ${Math.round(barH * 0.2)}px sans-serif`;
+      ctx.font = `600 ${Math.round(barH * 0.2)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText(BRAND.phones[0], W - pad, y + barH * 0.58);
       ctx.fillText(BRAND.phones[1], W - pad, y + barH * 0.82);
       ctx.textAlign = "left";
     }
-  }, [photo, logo, tpl]);
+
+    if (s.style === "sold") {
+      // dim the whole photo slightly to make the stamp pop
+      ctx.fillStyle = "rgba(0,0,0,0.32)";
+      ctx.fillRect(0, 0, W, H);
+
+      // big diagonal SOLD ribbon across the image
+      ctx.save();
+      ctx.translate(W / 2, H / 2);
+      ctx.rotate(-Math.PI / 9); // ~ -20deg
+      const ribbonH = Math.round(H * 0.2);
+      const ribbonW = W * 1.4;
+      // ribbon background
+      const rg = ctx.createLinearGradient(-ribbonW / 2, 0, ribbonW / 2, 0);
+      rg.addColorStop(0, "#b91c1c");
+      rg.addColorStop(0.5, "#ef4444");
+      rg.addColorStop(1, "#b91c1c");
+      ctx.fillStyle = rg;
+      ctx.fillRect(-ribbonW / 2, -ribbonH / 2, ribbonW, ribbonH);
+      // white border lines
+      ctx.strokeStyle = "rgba(255,255,255,0.9)";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(-ribbonW / 2, -ribbonH / 2 + 8, ribbonW, ribbonH - 16);
+      // SOLD text
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#fff";
+      ctx.shadowColor = "rgba(0,0,0,0.4)";
+      ctx.shadowBlur = 8;
+      ctx.font = `800 ${Math.round(ribbonH * 0.5)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText("ປິດການຂາຍແລ້ວ  •  SOLD", 0, 0);
+      ctx.shadowBlur = 0;
+      ctx.restore();
+
+      // bottom brand bar (same as bottomBar)
+      const barH = Math.round(H * 0.16);
+      const y = H - barH;
+      ctx.fillStyle = s.bg;
+      ctx.fillRect(0, y, W, barH);
+      ctx.fillStyle = s.accent;
+      ctx.fillRect(0, y, W, 6);
+      const logoSize = barH * 0.66;
+      drawLogo(pad, y + (barH - logoSize) / 2, logoSize);
+      const tx = pad + logoSize + pad * 0.6;
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#fff";
+      ctx.font = `700 ${Math.round(barH * 0.26)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText(BRAND.nameLao, tx, y + barH * 0.34);
+      ctx.font = `600 ${Math.round(barH * 0.2)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText(BRAND.nameEn, tx, y + barH * 0.62);
+      ctx.font = `500 ${Math.round(barH * 0.18)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillStyle = "rgba(255,255,255,0.85)";
+      ctx.fillText("☎ " + phoneText, tx, y + barH * 0.85);
+    }
+  }, [photo, logo, tpl, fontReady]);
 
   useEffect(() => {
     draw();
@@ -329,7 +406,7 @@ export default function Watermark() {
         </button>
         <div className="text-center flex-1">
           <h1 className="text-lg font-bold text-white">ໃສ່ລາຍນ້ຳ (Watermark)</h1>
-          <p className="text-[11px] text-brand-400">10 ຮູບແບບ ໃຫ້ເລືອກໃຊ້</p>
+          <p className="text-[11px] text-brand-400">11 ຮູບແບບ ໃຫ້ເລືອກໃຊ້</p>
         </div>
         <div className="w-8" />
       </div>
