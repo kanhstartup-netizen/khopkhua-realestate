@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, SlidersHorizontal, ChevronRight, Bed, Bath, Trash2, MapPin } from "lucide-react";
 import { PageHeader } from "../components/Shell";
 import { useStore } from "../context/Store";
@@ -12,6 +13,7 @@ const tabs = [
 ];
 
 export default function Properties() {
+  const navigate = useNavigate();
   const { properties, removeProperty } = useStore();
   const [tab, setTab] = useState("all");
   const [q, setQ] = useState("");
@@ -77,8 +79,9 @@ export default function Properties() {
         {filtered.map((p, i) => (
           <div
             key={p.id}
+            onClick={() => navigate(`/property/${p.id}`)}
             style={{ animationDelay: `${i * 50}ms` }}
-            className="card p-3 flex gap-3 fade-up hover:border-white/20 hover:-translate-y-0.5 transition-all duration-200"
+            className="card p-3 flex gap-3 fade-up hover:border-white/20 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer active:scale-[0.99]"
           >
             <img
               src={p.img}
@@ -127,7 +130,10 @@ export default function Properties() {
                   </a>
                 )}
                 <button
-                  onClick={() => removeProperty(p.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeProperty(p.id);
+                  }}
                   className="text-[10px] text-rose-400/70 flex items-center gap-1 active:scale-95 transition-transform"
                 >
                   <Trash2 size={11} /> ລຶບ

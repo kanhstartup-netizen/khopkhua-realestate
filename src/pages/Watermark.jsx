@@ -6,6 +6,7 @@ import {
   Download,
   ImageIcon,
   Check,
+  X,
 } from "lucide-react";
 import { BRAND, TEMPLATES } from "../data/watermarks";
 
@@ -36,11 +37,15 @@ function rr(ctx, x, y, w, h, r) {
 export default function Watermark() {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
-  const [photo, setPhoto] = useState(null); // HTMLImageElement
+  const [photos, setPhotos] = useState([]); // HTMLImageElement[]
+  const [activeIdx, setActiveIdx] = useState(0);
   const [logo, setLogo] = useState(null);
   const [tpl, setTpl] = useState(TEMPLATES[0]);
   const [downloaded, setDownloaded] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [fontReady, setFontReady] = useState(false);
+
+  const photo = photos[activeIdx] || null;
 
   // preload logo
   useEffect(() => {
@@ -69,20 +74,34 @@ export default function Watermark() {
   }, []);
 
   const onUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    loadImg(url).then((img) => {
-      setPhoto(img);
-      URL.revokeObjectURL(url);
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    Promise.all(
+      files.map((file) => {
+        const url = URL.createObjectURL(file);
+        return loadImg(url).then((img) => {
+          URL.revokeObjectURL(url);
+          return img;
+        });
+      })
+    ).then((imgs) => {
+      setPhotos((prev) => [...prev, ...imgs]);
     });
+    e.target.value = "";
   };
 
-  // Main draw routine — draws photo + chosen watermark style
-  const draw = useCallback(() => {
-    const canvas = canvasRef.current;
+  const removePhoto = (idx) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== idx));
+    setActiveIdx((cur) => (cur >= idx && cur > 0 ? cur - 1 : cur));
+  };
+
+  // Render a given photo + template onto a given canvas. Reused for preview & export.
+  const renderCanvas = useCallback(
+    (canvas, photoArg, tplArg) => {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
+    const photo = photoArg;
+    const tpl = tplArg;
 
     // Output canvas keeps the photo's native ratio, capped at 1080 wide
     const baseW = 1080;
@@ -673,25 +692,56 @@ export default function Watermark() {
       ctx.fillText("☎ " + BRAND.phones[0], tx, y + ch * 0.58);
       ctx.fillText("☎ " + BRAND.phones[1], tx, y + ch * 0.82);
     }
-  }, [photo, logo, tpl, fontReady]);
+  }, [logo]);
 
+  // preview the active photo
   useEffect(() => {
-    draw();
-  }, [draw]);
+    renderCanvas(canvasRef.current, photo, tpl);
+  }, [renderCanvas, photo, tpl, fontReady]);
 
+  // download the currently previewed image
   const download = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    canvas.toBlob((blob) => {
+    canvas.toBlob(
+      (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `khopkhua-${tpl.id}-${Date.now()}.jpg`;
+        a.click();
+        URL.revokeObjectURL(url);
+        setDownloaded(true);
+        setTimeout(() => setDownloaded(false), 1500);
+      },
+      "image/jpeg",
+      0.92
+    );
+  };
+
+  // apply the chosen template to ALL photos and download each
+  const downloadAll = async () => {
+    if (!photos.length) return;
+    setDownloading(true);
+    const off = document.createElement("canvas");
+    for (let i = 0; i < photos.length; i++) {
+      renderCanvas(off, photos[i], tpl);
+      // wait a frame so canvas is painted
+      await new Promise((r) => setTimeout(r, 60));
+      const blob = await new Promise((res) =>
+        off.toBlob(res, "image/jpeg", 0.92)
+      );
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `khopkhua-${tpl.id}-${Date.now()}.jpg`;
+      a.download = `khopkhua-${tpl.id}-${i + 1}.jpg`;
       a.click();
       URL.revokeObjectURL(url);
-      setDownloaded(true);
-      setTimeout(() => setDownloaded(false), 1500);
-    }, "image/jpeg", 0.92);
+      await new Promise((r) => setTimeout(r, 250)); // stagger downloads
+    }
+    setDownloading(false);
+    setDownloaded(true);
+    setTimeout(() => setDownloaded(false), 1500);
   };
 
   return (
@@ -722,14 +772,63 @@ export default function Watermark() {
         </div>
       </div>
 
+      {/* Thumbnails (multi image) */}
+      {photos.length > 0 && (
+        <div className="px-5 mt-3">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[11px] text-white/60">
+              {photos.length} ຮູບ • ກົດເລືອກເພື່ອເບິ່ງຕົວຢ່າງ
+            </p>
+            <button
+              onClick={() => {
+                setPhotos([]);
+                setActiveIdx(0);
+              }}
+              className="text-[11px] text-rose-400/80"
+            >
+              ລຶບທັງໝົດ
+            </button>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {photos.map((ph, i) => (
+              <div key={i} className="relative shrink-0">
+                <img
+                  src={ph.src}
+                  alt=""
+                  onClick={() => setActiveIdx(i)}
+                  className={`w-16 h-16 rounded-xl object-cover cursor-pointer transition-all ${
+                    activeIdx === i
+                      ? "ring-2 ring-violet-500 scale-105"
+                      : "opacity-70 hover:opacity-100"
+                  }`}
+                />
+                <button
+                  onClick={() => removePhoto(i)}
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 flex items-center justify-center"
+                  aria-label="ລຶບຮູບ"
+                >
+                  <X size={11} className="text-white" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Upload */}
       <div className="px-5 mt-3">
         <label className="card border-dashed border-2 border-line py-4 flex items-center justify-center gap-2 text-white/70 hover:border-violet-500/50 transition-colors cursor-pointer">
           <UploadCloud size={20} className="text-violet-500" />
           <span className="text-sm font-medium">
-            {photo ? "ປ່ຽນຮູບ" : "ອັບໂຫລດຮູບຊັບສິນ"}
+            {photos.length ? "ເພີ່ມຮູບ (ໄດ້ຫລາຍຮູບ)" : "ອັບໂຫລດຮູບຊັບສິນ (ໄດ້ຫລາຍຮູບ)"}
           </span>
-          <input type="file" accept="image/*" onChange={onUpload} className="hidden" />
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={onUpload}
+            className="hidden"
+          />
         </label>
       </div>
 
@@ -767,11 +866,32 @@ export default function Watermark() {
       </div>
 
       {/* Download */}
-      <div className="px-5 mt-5">
+      <div className="px-5 mt-5 space-y-2">
+        {photos.length > 1 && (
+          <button
+            onClick={downloadAll}
+            disabled={downloading}
+            className="w-full gradient-btn py-3.5 rounded-2xl font-semibold text-white shadow-glow flex items-center justify-center gap-2 active:scale-95 hover:brightness-110 transition-all disabled:opacity-60"
+          >
+            {downloading ? (
+              <>
+                <Download size={20} className="animate-bounce" /> ກຳລັງດາວໂຫລດ...
+              </>
+            ) : (
+              <>
+                <Download size={20} /> ດາວໂຫລດທັງໝົດ ({photos.length} ຮູບ)
+              </>
+            )}
+          </button>
+        )}
         <button
           onClick={download}
           disabled={!photo}
-          className="w-full gradient-btn py-3.5 rounded-2xl font-semibold text-white shadow-glow flex items-center justify-center gap-2 active:scale-95 hover:brightness-110 transition-all disabled:opacity-50"
+          className={`w-full py-3.5 rounded-2xl font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50 ${
+            photos.length > 1
+              ? "card text-white hover:border-white/25"
+              : "gradient-btn text-white shadow-glow hover:brightness-110"
+          }`}
         >
           {downloaded ? (
             <>
@@ -779,12 +899,14 @@ export default function Watermark() {
             </>
           ) : (
             <>
-              <Download size={20} /> ດາວໂຫລດຮູບ (ບັນທຶກລົງໂທລະສັບ)
+              <Download size={20} /> ດາວໂຫລດຮູບນີ້
             </>
           )}
         </button>
-        <p className="text-center text-[11px] text-white/40 mt-2">
-          {photo ? "ກົດດາວໂຫລດ ເພື່ອບັນທຶກຮູບທີ່ໃສ່ລາຍນ້ຳແລ້ວ" : "ກະລຸນາອັບໂຫລດຮູບກ່ອນ"}
+        <p className="text-center text-[11px] text-white/40">
+          {photos.length
+            ? "ຮູບຈະບັນທຶກລົງໂທລະສັບ ພ້ອມໂພສ Facebook / TikTok"
+            : "ກະລຸນາອັບໂຫລດຮູບກ່ອນ"}
         </p>
       </div>
 

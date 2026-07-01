@@ -1,257 +1,133 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import {
-  ChevronLeft,
-  MapPin,
-  Bed,
-  Bath,
-  Maximize,
-  Share2,
-  Facebook,
-  Send,
-  Copy,
-  Check,
-  Droplet,
-  Tag,
-} from "lucide-react";
-import { useStore } from "../context/Store";
-import { fmtLAK } from "../data/seed";
+# 🏠 Khopkhua Realestate — ຄອບຄົວ ອະສັງຫາ
 
-const PHONES = ["020 55355 347", "020 9169 4499"];
+ແອັບຈັດການອະສັງຫາ (ດິນ & ເຮືອນ) ສຳລັບເກັບກຳຊັບສິນ ກຽມໄວ້ຂາຍ
+ພ້ອມເມນູ **Staff AI** ທີ່ເຮັດວຽກແທນທ່ານ 24 ຊົ່ວໂມງ.
 
-export default function PropertyDetail() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const { properties } = useStore();
-  const [copied, setCopied] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
+ສ້າງດ້ວຍ **React + Vite + Tailwind CSS**. ຂໍ້ມູນຖືກບັນທຶກໄວ້ໃນ browser (localStorage).
 
-  const p = properties.find((x) => x.id === id);
+## ✨ ຄຸນສົມບັດ
 
-  if (!p) {
-    return (
-      <div className="fade-up pt-3 px-5">
-        <button onClick={() => navigate(-1)} className="text-white/70 flex items-center gap-1 mt-4">
-          <ChevronLeft size={20} /> ກັບຄືນ
-        </button>
-        <p className="text-white/50 text-center mt-20">ບໍ່ພົບຊັບສິນນີ້</p>
-      </div>
-    );
-  }
+- 📊 **ໜ້າຫລັກ (Dashboard)** — ພາບລວມຊັບສິນ, Leads, ດີລ, ໜ້າວຽກ
+- 🏘️ **ຈັດການຊັບສິນ** — ເພີ່ມ / ຄົ້ນຫາ / ກັ່ນຕອງ / ລຶບ (ດິນ, ເຮືອນ, ອາຄານ)
+- 🤖 **Staff AI** — ໜ່ວຍງານ AI 6 ໜ່ວຍ:
+  - ຄົ້ນຫາຊັບສິນ (Facebook / TikTok)
+  - ອອກແບບຮູບພາບ + ໃສ່ລາຍນ້ຳ
+  - ຕັດຕໍ່ຄລິບ
+  - ປິດການຂາຍ
+  - ການຕະຫລາດ
+  - ກົດໝາຍນາຍໜ້າ
+- 📈 **ລາຍງານ & ສະຖິຕິ** — ກຣາຟຜົນງານລາຍເດືອນ
+- 🔗 **ພ້ອມເຊື່ອມ n8n + AI** ສຳລັບ automation
 
-  const typeLabel =
-    p.type === "land" ? "ດິນ" : p.type === "house" ? "ເຮືອນ" : p.type === "building" ? "ອາຄານ" : "ອື່ນໆ";
+---
 
-  // Full share text with all info
-  const shareText = `🏠 ${p.name}
-📍 ${p.location}
-💰 ${fmtLAK(p.price)}
-📐 ${p.area} m²${p.beds ? `\n🛏 ${p.beds} ຫ້ອງນອນ` : ""}${p.baths ? `\n🚿 ${p.baths} ຫ້ອງນ້ຳ` : ""}
-${p.desc ? `\n${p.desc}` : ""}
-${p.mapUrl ? `\n🗺 ${p.mapUrl}` : ""}
+## 🚀 ວິທີອັບຂຶ້ນ GitHub (ລະອຽດ)
 
-📞 ຕິດຕໍ່: ${PHONES.join(" , ")}
-🏢 ຄອບຄົວ ອະສັງຫາ / Khopkhua Real estate`;
+### ✅ ສິ່ງທີ່ຕ້ອງມີກ່ອນ
+1. ບັນຊີ GitHub → https://github.com/signup
+2. ຕິດຕັ້ງ **Git** → https://git-scm.com/downloads
+3. ຕິດຕັ້ງ **Node.js** (ເວີຊັນ 18 ຂຶ້ນໄປ) → https://nodejs.org
 
-  const doShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: p.name, text: shareText });
-        return;
-      } catch {
-        /* fall through to menu */
-      }
-    }
-    setShareOpen((v) => !v);
-  };
+---
 
-  const copyText = () => {
-    navigator.clipboard?.writeText(shareText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
+### ວິທີທີ 1 — ໃຊ້ເວັບ GitHub (ງ່າຍທີ່ສຸດ, ບໍ່ຕ້ອງໃຊ້ command)
 
-  const enc = encodeURIComponent(shareText);
-  const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-    p.mapUrl || "https://khopkhua.la"
-  )}&quote=${enc}`;
-  const waUrl = `https://wa.me/?text=${enc}`;
-  const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(
-    p.mapUrl || "https://khopkhua.la"
-  )}&text=${enc}`;
+1. ເຂົ້າ https://github.com ແລ້ວ login
+2. ກົດປຸ່ມ **+** (ມຸມຂວາເທິງ) → **New repository**
+3. ຕັ້ງຊື່ repository ເປັນ `khopkhua-realestate`
+4. ເລືອກ **Public** (ຫລື Private ກໍໄດ້) → ກົດ **Create repository**
+5. ໃນໜ້າ repo ໃໝ່ ກົດ **uploading an existing file**
+6. ລາກ **ທຸກໄຟລ໌ໃນໂຟນເດີ້ນີ້** (ຍົກເວັ້ນ `node_modules` ແລະ `dist`) ເຂົ້າໄປ
+7. ກົດ **Commit changes**
 
-  return (
-    <div className="fade-up pt-3 pb-4">
-      {/* Hero image */}
-      <div className="relative">
-        <img src={p.img} alt={p.name} className="w-full h-64 object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-black/30" />
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 w-9 h-9 rounded-full glass flex items-center justify-center active:scale-90 transition-transform"
-          aria-label="ກັບຄືນ"
-        >
-          <ChevronLeft size={20} className="text-white" />
-        </button>
-        <button
-          onClick={doShare}
-          className="absolute top-4 right-4 w-9 h-9 rounded-full glass flex items-center justify-center active:scale-90 transition-transform"
-          aria-label="ແຊຣ໌"
-        >
-          <Share2 size={18} className="text-white" />
-        </button>
-        <div className="absolute top-4 left-1/2 -translate-x-1/2">
-          <span className="glass px-3 py-1 rounded-full text-[11px] text-white flex items-center gap-1">
-            <Tag size={11} className="text-gold" /> {typeLabel}
-          </span>
-        </div>
-        <div className="absolute bottom-3 left-4 right-4">
-          <span className="bg-brand-600/80 text-white text-[11px] px-2.5 py-1 rounded-lg">
-            {p.status}
-          </span>
-        </div>
-      </div>
+> ⚠️ **ຢ່າອັບໂຟນເດີ້ `node_modules`** — ມັນໃຫຍ່ຫລາຍ. ໄຟລ໌ `.gitignore` ໄດ້ກັນໄວ້ແລ້ວ.
 
-      {/* Body */}
-      <div className="px-5 -mt-3 relative">
-        <h1 className="text-xl font-bold text-white">{p.name}</h1>
-        <p className="text-sm text-white/60 flex items-center gap-1 mt-1">
-          <MapPin size={14} className="text-brand-400" /> {p.location}
-        </p>
-        <p className="text-2xl gold-text font-extrabold mt-2">{fmtLAK(p.price)}</p>
+---
 
-        {/* stats */}
-        <div className="grid grid-cols-3 gap-3 mt-4">
-          <div className="card p-3 flex flex-col items-center">
-            <Maximize size={18} className="text-brand-400" />
-            <p className="text-white font-semibold text-sm mt-1">{p.area}</p>
-            <p className="text-[10px] text-white/45">m²</p>
-          </div>
-          <div className="card p-3 flex flex-col items-center">
-            <Bed size={18} className="text-violet-400" />
-            <p className="text-white font-semibold text-sm mt-1">{p.beds || "-"}</p>
-            <p className="text-[10px] text-white/45">ຫ້ອງນອນ</p>
-          </div>
-          <div className="card p-3 flex flex-col items-center">
-            <Bath size={18} className="text-cyan-400" />
-            <p className="text-white font-semibold text-sm mt-1">{p.baths || "-"}</p>
-            <p className="text-[10px] text-white/45">ຫ້ອງນ້ຳ</p>
-          </div>
-        </div>
+### ວິທີທີ 2 — ໃຊ້ Command Line (ແນະນຳ)
 
-        {/* description */}
-        {p.desc && (
-          <div className="card p-4 mt-4">
-            <p className="text-xs text-white/55 mb-1">ລາຍລະອຽດ</p>
-            <p className="text-sm text-white/85 leading-relaxed">{p.desc}</p>
-          </div>
-        )}
+ເປີດ Terminal / Command Prompt ໃນໂຟນເດີ້ໂປຣເຈັກນີ້ ແລ້ວພິມ:
 
-        {/* map */}
-        {p.mapUrl && (
-          <a
-            href={p.mapUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="card p-3 mt-4 flex items-center gap-3 active:scale-[0.98] transition hover:border-brand-400/40"
-          >
-            <div className="w-10 h-10 rounded-xl bg-brand-500/15 flex items-center justify-center">
-              <MapPin size={20} className="text-brand-400" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm text-white font-medium">ເບິ່ງແຜນທີ່ຕຳແໜ່ງ</p>
-              <p className="text-[11px] text-white/50">ເປີດໃນ Google Maps</p>
-            </div>
-            <ChevronLeft size={18} className="text-white/40 rotate-180" />
-          </a>
-        )}
+```bash
+# 1. ເລີ່ມ git
+git init
 
-        {/* contact */}
-        <div className="card p-4 mt-4">
-          <p className="text-xs text-white/55 mb-2">ຕິດຕໍ່ສອບຖາມ</p>
-          {PHONES.map((ph) => (
-            <a
-              key={ph}
-              href={`tel:${ph.replace(/\s/g, "")}`}
-              className="flex items-center gap-2 py-1.5 text-brand-400 font-medium"
-            >
-              📞 {ph}
-            </a>
-          ))}
-          <p className="text-[11px] text-white/45 mt-1">
-            ຄອບຄົວ ອະສັງຫາ • Khopkhua Real estate
-          </p>
-        </div>
+# 2. ເພີ່ມໄຟລ໌ທັງໝົດ
+git add .
 
-        {/* actions */}
-        <div className="grid grid-cols-2 gap-3 mt-4">
-          <button
-            onClick={() => navigate("/watermark")}
-            className="card py-3 flex items-center justify-center gap-2 text-white font-medium active:scale-95 transition hover:border-white/25"
-          >
-            <Droplet size={18} className="text-brand-400" /> ໃສ່ລາຍນ້ຳ
-          </button>
-          <button
-            onClick={doShare}
-            className="gradient-btn py-3 rounded-2xl flex items-center justify-center gap-2 text-white font-semibold active:scale-95 hover:brightness-110 transition shadow-glow"
-          >
-            <Share2 size={18} /> ແຊຣ໌
-          </button>
-        </div>
-      </div>
+# 3. ບັນທຶກ (commit) ຄັ້ງທຳອິດ
+git commit -m "ສ້າງແອັບ Khopkhua Realestate"
 
-      {/* Share sheet */}
-      {shareOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50"
-          onClick={() => setShareOpen(false)}
-        >
-          <div
-            className="w-full max-w-[440px] glass rounded-t-3xl p-5 fade-up"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-10 h-1 rounded-full bg-white/25 mx-auto mb-4" />
-            <p className="text-white font-semibold mb-4">ແຊຣ໌ໄປທີ່</p>
-            <div className="grid grid-cols-4 gap-3">
-              <a href={fbUrl} target="_blank" rel="noreferrer" className="flex flex-col items-center gap-1.5">
-                <span className="w-14 h-14 rounded-2xl bg-blue-600/20 flex items-center justify-center">
-                  <Facebook size={24} className="text-blue-400" />
-                </span>
-                <span className="text-[10px] text-white/70">Facebook</span>
-              </a>
-              <a href={waUrl} target="_blank" rel="noreferrer" className="flex flex-col items-center gap-1.5">
-                <span className="w-14 h-14 rounded-2xl bg-green-600/20 flex items-center justify-center">
-                  <Send size={22} className="text-green-400" />
-                </span>
-                <span className="text-[10px] text-white/70">WhatsApp</span>
-              </a>
-              <a href={tgUrl} target="_blank" rel="noreferrer" className="flex flex-col items-center gap-1.5">
-                <span className="w-14 h-14 rounded-2xl bg-sky-600/20 flex items-center justify-center">
-                  <Send size={22} className="text-sky-400" />
-                </span>
-                <span className="text-[10px] text-white/70">Telegram</span>
-              </a>
-              <button onClick={copyText} className="flex flex-col items-center gap-1.5">
-                <span className="w-14 h-14 rounded-2xl bg-violet-600/20 flex items-center justify-center">
-                  {copied ? <Check size={22} className="text-brand-400" /> : <Copy size={22} className="text-violet-400" />}
-                </span>
-                <span className="text-[10px] text-white/70">{copied ? "ສຳເນົາແລ້ວ" : "ສຳເນົາ"}</span>
-              </button>
-            </div>
-            <div className="card p-3 mt-4">
-              <p className="text-[11px] text-white/50 whitespace-pre-line leading-relaxed max-h-32 overflow-y-auto">
-                {shareText}
-              </p>
-            </div>
-            <button
-              onClick={() => setShareOpen(false)}
-              className="w-full mt-4 py-3 rounded-2xl card text-white/80 font-medium active:scale-95 transition"
-            >
-              ປິດ
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+# 4. ຕັ້ງ branch ເປັນ main
+git branch -M main
+
+# 5. ເຊື່ອມກັບ repo ໃນ GitHub
+#    (ປ່ຽນ YOUR_USERNAME ເປັນຊື່ບັນຊີ GitHub ຂອງທ່ານ)
+git remote add origin https://github.com/YOUR_USERNAME/khopkhua-realestate.git
+
+# 6. ອັບຂຶ້ນ GitHub
+git push -u origin main
+```
+
+ຖ້າຖາມ username/password:
+- **Username** = ຊື່ບັນຊີ GitHub
+- **Password** = ໃຊ້ **Personal Access Token** (ບໍ່ແມ່ນລະຫັດຜ່ານ)
+  - ສ້າງ token ໄດ້ທີ່: GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token → ຕິກ `repo` → Generate
+
+---
+
+## 🌐 ເຮັດໃຫ້ແອັບອອນລາຍ ຟຣີ (GitHub Pages)
+
+ໂປຣເຈັກນີ້ມີ **GitHub Actions** ຕັ້ງໄວ້ແລ້ວ (`.github/workflows/deploy.yml`).
+ຫລັງຈາກ push ຂຶ້ນ GitHub:
+
+1. ເຂົ້າ repo → **Settings** → **Pages**
+2. ໃນ **Build and deployment** → **Source** ເລືອກ **GitHub Actions**
+3. ລໍຖ້າ 1–2 ນາທີ → ແອັບຈະ online ທີ່:
+   ```
+   https://YOUR_USERNAME.github.io/khopkhua-realestate/
+   ```
+
+ທຸກຄັ້ງທີ່ທ່ານ `git push` ໃໝ່ ແອັບຈະ update ໂດຍອັດຕະໂນມັດ.
+
+---
+
+## 💻 ການແລ່ນຢູ່ເຄື່ອງຕົນເອງ (Development)
+
+```bash
+npm install      # ຕິດຕັ້ງ package
+npm run dev      # ເປີດ http://localhost:5173
+npm run build    # build ສຳລັບ production (ໄຟລ໌ຢູ່ໃນ dist/)
+npm run preview  # ເບິ່ງ production build
+```
+
+---
+
+## 📁 ໂຄງສ້າງໄຟລ໌
+
+```
+khopkhua-realestate/
+├── public/              # logo, favicon
+├── src/
+│   ├── components/       # Logo, Shell (nav)
+│   ├── context/         # Store (ບັນທຶກຂໍ້ມູນ)
+│   ├── data/            # ຂໍ້ມູນຕົວຢ່າງ
+│   ├── pages/           # Dashboard, Properties, Staff, AddProperty, More
+│   ├── App.jsx          # router
+│   └── main.jsx
+├── .github/workflows/   # auto-deploy
+├── package.json
+└── README.md
+```
+
+---
+
+## 🔌 ການເຊື່ອມຕໍ່ n8n + AI (ຂັ້ນຕໍ່ໄປ)
+
+ໜ່ວຍງານ "ຄົ້ນຫາຊັບສິນ" ອອກແບບໄວ້ໃຫ້ເຊື່ອມກັບ n8n:
+1. ສ້າງ workflow ໃນ n8n ທີ່ scrape Facebook/TikTok
+2. ໃຫ້ມັນສົ່ງຂໍ້ມູນຊັບໃໝ່ໄປ webhook ຂອງແອັບ
+3. ໃນ 1 ມື້ຄວນມີລາຍງານ 5–10 ຊັບສິນ
+
+> ສ່ວນນີ້ຕ້ອງມີ backend/server. ປະຈຸບັນແອັບເກັບຂໍ້ມູນຢູ່ browser.
+> ຖ້າຕ້ອງການ backend ຈິງ ສາມາດເພີ່ມ Firebase / Supabase ໄດ້ພາຍຫລັງ.

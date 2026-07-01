@@ -19,29 +19,52 @@ export function PhoneShell({ children }) {
  */
 export function PageHeader({ title, subtitle, showBell = true, badge = 12 }) {
   return (
-    <div className="px-5 pt-4 flex items-center justify-between relative">
-      <div className="flex items-center gap-3 fade-up">
-        <div className="relative">
-          <Logo size={38} />
-          <div className="absolute -inset-1 rounded-full bg-emerald-400/10 blur-md -z-10" />
+    <div className="px-4 pt-3">
+      <div className="header-wrap glass px-4 py-3 flex items-center justify-between">
+        {/* animated background layer (behind content) */}
+        <div className="absolute inset-0 -z-0 pointer-events-none">
+          <div
+            className="header-orb orb-a"
+            style={{ width: 120, height: 120, left: -20, top: -40, background: "radial-gradient(circle,#7c3aed,transparent 70%)" }}
+          />
+          <div
+            className="header-orb orb-b"
+            style={{ width: 110, height: 110, right: -10, top: -30, background: "radial-gradient(circle,#10b981,transparent 70%)" }}
+          />
+          <div className="header-shimmer" />
         </div>
-        <div>
-          {subtitle && <p className="text-xs text-white/55">{subtitle}</p>}
-          <p className="font-bold text-white text-lg leading-tight">{title}</p>
-          <div className="h-[3px] w-8 rounded-full mt-0.5" style={{ background: "linear-gradient(90deg,#e8b840,#34d399)" }} />
+
+        {/* content */}
+        <div className="flex items-center gap-3 relative z-10">
+          <div className="relative">
+            <div className="logo-glow absolute -inset-1.5 rounded-full bg-emerald-400/20 blur-md -z-10" />
+            <Logo size={40} />
+          </div>
+          <div>
+            {subtitle && <p className="text-xs text-white/60">{subtitle}</p>}
+            <p className="font-bold text-white text-lg leading-tight">{title}</p>
+            <div
+              className="h-[3px] w-9 rounded-full mt-0.5"
+              style={{ background: "linear-gradient(90deg,#e8b840,#34d399)" }}
+            />
+          </div>
         </div>
+
+        {showBell && (
+          <button
+            className="relative z-10 active:scale-90 transition-transform w-10 h-10 rounded-full glass flex items-center justify-center"
+            aria-label="ການແຈ້ງເຕືອນ"
+          >
+            <span className="absolute inset-0 rounded-full bg-violet-500/10 pulse-ring" />
+            <Bell size={20} className="text-white/85 relative" />
+            {badge > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-rose-500 text-[9px] min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center font-bold">
+                {badge}
+              </span>
+            )}
+          </button>
+        )}
       </div>
-      {showBell && (
-        <button className="relative active:scale-90 transition-transform" aria-label="ການແຈ້ງເຕືອນ">
-          <span className="absolute inset-0 -m-2 rounded-full bg-violet-500/10 pulse-ring" />
-          <Bell size={22} className="text-white/80 relative" />
-          {badge > 0 && (
-            <span className="absolute -top-1 -right-1 bg-rose-500 text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
-              {badge}
-            </span>
-          )}
-        </button>
-      )}
     </div>
   );
 }
