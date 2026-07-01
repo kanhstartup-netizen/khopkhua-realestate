@@ -35,7 +35,7 @@ const features = [
   { icon: Bell, label: "ການແຈ້ງເຕືອນ", color: "#ef4444", badge: 12 },
   { icon: CloudUpload, label: "Backup & Sync", color: "#06b6d4" },
   { icon: Smartphone, label: "Mobile Access", color: "#10b981" },
-  { icon: Settings, label: "ການຕັ້ງຄ່າ", color: "#94a3b8" },
+  { icon: Settings, label: "ການຕັ້ງຄ່າ", color: "#94a3b8", to: "/settings" },
 ];
 
 export default function More() {

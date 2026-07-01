@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { ChevronLeft, Plus, Bot, Search, ChevronRight } from "lucide-react";
+import { ChevronLeft, Plus, Bot, Search, ChevronRight, MessageCircle } from "lucide-react";
 import * as Icons from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../context/Store";
 import { aiStaff } from "../data/seed";
+import { hasApiKey } from "../lib/ai";
 
 function ProgressRow({ title, progress, color }) {
   return (
@@ -31,6 +32,7 @@ export default function Staff() {
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState("");
   const [staff, setStaff] = useState("finder");
+  const hasKey = hasApiKey();
 
   const staffName = (id) => aiStaff.find((s) => s.id === id)?.name || "AI";
   const staffColor = (id) => aiStaff.find((s) => s.id === id)?.color || "#8b5cf6";
@@ -81,6 +83,14 @@ export default function Staff() {
             <br />
             ກຳລັງເຮັດວຽກໃຫ້ທ່ານ 24/7
           </p>
+          {!hasKey && (
+            <button
+              onClick={() => navigate("/settings")}
+              className="mt-3 relative text-[11px] px-3 py-1.5 rounded-full bg-amber-400/15 text-amber-300 font-medium active:scale-95 transition-transform"
+            >
+              ⚡ ຕັ້ງຄ່າ API key ເພື່ອເລີ່ມຄຸຍກັບ AI Staff
+            </button>
+          )}
         </div>
       </div>
 
@@ -191,20 +201,24 @@ export default function Staff() {
                     </li>
                   ))}
                 </ul>
-                <button
-                  onClick={() => {
-                    if (s.id === "finder") navigate("/finder");
-                    else if (s.id === "designer") navigate("/watermark");
-                  }}
-                  className="mt-2.5 w-full text-[11px] py-1.5 rounded-lg font-medium text-white active:scale-95 transition-transform hover:brightness-125"
-                  style={{ background: `${s.color}33` }}
-                >
-                  {s.id === "finder"
-                    ? "ເບິ່ງຊັບທີ່ຄົ້ນພົບ"
-                    : s.id === "designer"
-                    ? "ໃສ່ລາຍນ້ຳ"
-                    : "ໄປເຮັດວຽກ"}
-                </button>
+                <div className="mt-2.5 flex gap-1.5">
+                  <button
+                    onClick={() => navigate(`/staff/${s.id}/chat`)}
+                    className="flex-1 text-[11px] py-1.5 rounded-lg font-medium text-white active:scale-95 transition-transform hover:brightness-125 flex items-center justify-center gap-1"
+                    style={{ background: `${s.color}33` }}
+                  >
+                    <MessageCircle size={11} /> ຄຸຍນຳ
+                  </button>
+                  {(s.id === "finder" || s.id === "designer") && (
+                    <button
+                      onClick={() => navigate(s.id === "finder" ? "/finder" : "/watermark")}
+                      aria-label={s.id === "finder" ? "ເບິ່ງຊັບທີ່ຄົ້ນພົບ" : "ໃສ່ລາຍນ້ຳ"}
+                      className="w-8 shrink-0 rounded-lg bg-white/5 flex items-center justify-center active:scale-90 transition-transform hover:bg-white/10"
+                    >
+                      <ChevronRight size={14} className="text-white/50" />
+                    </button>
+                  )}
+                </div>
               </div>
             );
           })}

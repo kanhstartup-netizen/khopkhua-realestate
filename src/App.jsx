@@ -11,6 +11,8 @@ import More from "./pages/More";
 import Finder from "./pages/Finder";
 import Watermark from "./pages/Watermark";
 import PropertyDetail from "./pages/PropertyDetail";
+import Chat from "./pages/Chat";
+import Settings from "./pages/Settings";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -32,10 +34,12 @@ export default function App() {
             <Route path="/properties" element={<Properties />} />
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/staff" element={<Staff />} />
+            <Route path="/staff/:staffId/chat" element={<Chat />} />
             <Route path="/finder" element={<Finder />} />
             <Route path="/watermark" element={<Watermark />} />
             <Route path="/add" element={<AddProperty />} />
             <Route path="/more" element={<More />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
           <BottomNav />
         </PhoneShell>

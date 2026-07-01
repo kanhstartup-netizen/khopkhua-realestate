@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { PageHeader } from "../components/Shell";
 import { useStore } from "../context/Store";
-import { fmtMoney } from "../data/seed";
+import { fmtLAK } from "../data/seed";
 
 function Stat({ value, label, delta, up = true }) {
   return (
@@ -131,7 +131,7 @@ export default function Dashboard() {
               <p className="text-[11px] text-white/55">{recent.location}</p>
               <p className="text-[11px] text-white/55">{recent.area} m²</p>
               <p className="text-sm gold-text font-bold mt-1">
-                {fmtMoney(recent.price, recent.currency)}
+                {fmtLAK(recent.price)}
               </p>
             </div>
             <span className="self-start bg-brand-600/20 text-brand-400 text-[10px] px-2 py-1 rounded-lg">

@@ -257,15 +257,4 @@ export const TEMPLATES = [
     bg: "rgba(6,16,30,0.85)",
     text: "#ffffff",
   },
-  // ===== 10 ລາຍນ້ຳກາງຮູບ (center watermarks) =====
-  { id: "c1", name: "ກາງ: ໂລໂກ້+ຊື່", style: "centerLogoName", accent: "#e8b840", bg: "rgba(0,0,0,0)", text: "#ffffff" },
-  { id: "c2", name: "ກາງ: ກ່ອງແກ້ວ", style: "centerGlass", accent: "#34d399", bg: "rgba(6,16,30,0.55)", text: "#ffffff" },
-  { id: "c3", name: "ກາງ: ເສັ້ນຄູ່ຄຳ", style: "centerLines", accent: "#e8b840", bg: "rgba(0,0,0,0)", text: "#ffffff" },
-  { id: "c4", name: "ກາງ: ໂລໂກ້ໃຫຍ່ຈາງ", style: "centerBigFaint", accent: "#ffffff", bg: "rgba(0,0,0,0)", text: "#ffffff" },
-  { id: "c5", name: "ກາງ: ປ້າຍວົງມົນ", style: "centerCircle", accent: "#8b5cf6", bg: "rgba(6,16,30,0.6)", text: "#ffffff" },
-  { id: "c6", name: "ກາງ: ໂທນມືອາຊີບ", style: "centerPro", accent: "#e8b840", bg: "rgba(6,16,30,0.5)", text: "#ffffff" },
-  { id: "c7", name: "ກາງ: ຂາຍດ່ວນ", style: "centerHot", accent: "#ef4444", bg: "rgba(0,0,0,0)", text: "#ffffff" },
-  { id: "c8", name: "ກາງ: ໂທນເຢັນ", style: "centerCool", accent: "#06b6d4", bg: "rgba(6,16,30,0.5)", text: "#ffffff" },
-  { id: "c9", name: "ກາງ: ຂອບຄຳຫລູ", style: "centerGoldFrame", accent: "#e8b840", bg: "rgba(0,0,0,0)", text: "#ffffff" },
-  { id: "c10", name: "ກາງ: ຕິດຕໍ່ດ່ວນ", style: "centerContact", accent: "#22c55e", bg: "rgba(6,16,30,0.6)", text: "#ffffff" },
 ];

@@ -18,16 +18,8 @@ export function StoreProvider({ children }) {
   );
   const [tasks, setTasks] = useState(() => load("kk_tasks", seedTasks));
   const [leads, setLeads] = useState(() => load("kk_leads", seedFoundLeads));
-  // images passed to the Watermark page (not persisted)
-  const [pendingImages, setPendingImages] = useState([]);
-  // AI settings (n8n webhook endpoints)
-  const [settings, setSettings] = useState(() =>
-    load("kk_settings", { chatWebhook: "", contentWebhook: "" })
-  );
-
-  useEffect(() => {
-    localStorage.setItem("kk_settings", JSON.stringify(settings));
-  }, [settings]);
+  // ປະຫວັດການສົນທະນາກັບ AI staff ແຕ່ລະຄົນ: { [staffId]: [{role, content, ts}] }
+  const [chats, setChats] = useState(() => load("kk_chats", {}));
 
   useEffect(() => {
     localStorage.setItem("kk_properties", JSON.stringify(properties));
@@ -38,17 +30,36 @@ export function StoreProvider({ children }) {
   useEffect(() => {
     localStorage.setItem("kk_leads", JSON.stringify(leads));
   }, [leads]);
+  useEffect(() => {
+    localStorage.setItem("kk_chats", JSON.stringify(chats));
+  }, [chats]);
+
+  const getChat = (staffId) => chats[staffId] || [];
+
+  const addChatMessage = (staffId, message) => {
+    setChats((prev) => ({
+      ...prev,
+      [staffId]: [...(prev[staffId] || []), message],
+    }));
+  };
+
+  const setChatMessages = (staffId, messages) => {
+    setChats((prev) => ({ ...prev, [staffId]: messages }));
+  };
+
+  const clearChat = (staffId) => {
+    setChats((prev) => {
+      const next = { ...prev };
+      delete next[staffId];
+      return next;
+    });
+  };
 
   const addProperty = (p) =>
     setProperties((prev) => [{ ...p, id: "p" + Date.now() }, ...prev]);
 
   const removeProperty = (id) =>
     setProperties((prev) => prev.filter((p) => p.id !== id));
-
-  const updateProperty = (id, patch) =>
-    setProperties((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...patch } : p))
-    );
 
   const addTask = (t) =>
     setTasks((prev) => [{ ...t, id: "t" + Date.now(), progress: 0 }, ...prev]);
@@ -102,17 +113,16 @@ export function StoreProvider({ children }) {
         properties,
         addProperty,
         removeProperty,
-        updateProperty,
         tasks,
         addTask,
         leads,
         approveLead,
         rejectLead,
         simulateFind,
-        pendingImages,
-        setPendingImages,
-        settings,
-        setSettings,
+        getChat,
+        addChatMessage,
+        setChatMessages,
+        clearChat,
       }}
     >
       {children}
