@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ChevronLeft,
@@ -8,8 +8,11 @@ import {
   LocateFixed,
   Link2,
   Loader2,
+  X,
 } from "lucide-react";
 import { useStore } from "../context/Store";
+import { CURRENCIES } from "../data/seed";
+import WatermarkPicker from "../components/WatermarkPicker";
 
 const types = [
   { key: "land", label: "ດິນ" },
@@ -44,6 +47,7 @@ export default function AddProperty() {
     name: "",
     location: "",
     price: "",
+    currency: "LAK",
     area: "",
     beds: "",
     baths: "",
@@ -53,6 +57,27 @@ export default function AddProperty() {
   const [coords, setCoords] = useState(null); // {lat,lng}
   const [locating, setLocating] = useState(false);
   const [done, setDone] = useState(false);
+  const [images, setImages] = useState([]); // data URLs of uploaded photos
+  const [watermarked, setWatermarked] = useState([]); // data URLs with watermark
+  const wmRef = useRef(null);
+
+  const onPickImages = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    files.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImages((prev) => [...prev, reader.result]);
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = "";
+  };
+
+  const removeImage = (idx) => {
+    setImages((prev) => prev.filter((_, i) => i !== idx));
+    setWatermarked([]);
+  };
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
@@ -92,13 +117,27 @@ export default function AddProperty() {
     ? `https://maps.google.com/maps?q=${coords.lat},${coords.lng}&z=15&output=embed`
     : null;
 
-  const save = () => {
+  const save = async () => {
     if (!form.name.trim()) return;
+
+    // Compose watermarked images NOW to guarantee they're applied
+    let finalImages = images;
+    if (images.length && wmRef.current) {
+      try {
+        const composed = await wmRef.current.composeNow();
+        if (composed && composed.length) finalImages = composed;
+      } catch {
+        // fall back to already-composed state or raw
+        if (watermarked.length) finalImages = watermarked;
+      }
+    }
+
     addProperty({
       type,
       name: form.name,
       location: form.location,
       price: Number(form.price) || 0,
+      currency: form.currency || "LAK",
       area: Number(form.area) || 0,
       beds: Number(form.beds) || 0,
       baths: Number(form.baths) || 0,
@@ -106,7 +145,10 @@ export default function AddProperty() {
       mapUrl: form.mapUrl,
       coords,
       status: "ກຳລັງຂາຍ",
-      img: sampleImgs[Math.floor(Math.random() * sampleImgs.length)],
+      images: finalImages,
+      img:
+        finalImages[0] ||
+        sampleImgs[Math.floor(Math.random() * sampleImgs.length)],
     });
     setDone(true);
     setTimeout(() => navigate("/properties"), 900);
@@ -145,19 +187,63 @@ export default function AddProperty() {
 
       {/* Upload */}
       <div className="px-5 mt-4">
-        <div className="card border-dashed border-2 border-line py-7 flex flex-col items-center text-white/60 hover:border-violet-500/50 transition-colors cursor-pointer">
+        <label className="card border-dashed border-2 border-line py-7 flex flex-col items-center text-white/60 hover:border-violet-500/50 transition-colors cursor-pointer">
           <UploadCloud size={30} className="text-violet-500 mb-2" />
           <p className="text-sm font-medium text-white">ອັບໂຫລດຮູບພາບ</p>
-          <p className="text-[11px]">ກົດເພື່ອອັບໂຫລດ ຫລື ລາກວາງ</p>
-        </div>
-        <div className="flex gap-2 mt-3">
-          {sampleImgs.map((s, i) => (
-            <img key={i} src={s} alt="" className="w-16 h-16 rounded-xl object-cover" />
-          ))}
-          <div className="w-16 h-16 rounded-xl card flex items-center justify-center text-xs text-white/50">
-            +8
+          <p className="text-[11px]">ກົດເພື່ອອັບໂຫລດ (ໄດ້ຫລາຍຮູບ)</p>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={onPickImages}
+            className="hidden"
+          />
+        </label>
+
+        {/* Preview thumbnails */}
+        {images.length > 0 && (
+          <div className="flex gap-2 mt-3 flex-wrap">
+            {images.map((src, i) => (
+              <div key={i} className="relative">
+                <img
+                  src={src}
+                  alt=""
+                  className="w-16 h-16 rounded-xl object-cover"
+                />
+                {i === 0 && (
+                  <span className="absolute bottom-0 left-0 right-0 bg-brand-600/80 text-[8px] text-white text-center rounded-b-xl">
+                    ຮູບຫລັກ
+                  </span>
+                )}
+                <button
+                  onClick={() => removeImage(i)}
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 flex items-center justify-center"
+                  aria-label="ລຶບຮູບ"
+                >
+                  <X size={11} className="text-white" />
+                </button>
+              </div>
+            ))}
+            <label className="w-16 h-16 rounded-xl card flex items-center justify-center text-xs text-white/50 cursor-pointer hover:border-violet-500/50">
+              +
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={onPickImages}
+                className="hidden"
+              />
+            </label>
           </div>
-        </div>
+        )}
+
+        {/* Inline watermark picker */}
+        <WatermarkPicker
+          ref={wmRef}
+          images={images}
+          mode="compose"
+          onComposed={setWatermarked}
+        />
       </div>
 
       {/* Form */}
@@ -219,8 +305,27 @@ export default function AddProperty() {
           )}
         </div>
 
+        {/* Currency selector */}
+        <div>
+          <label className="text-xs text-white/55 mb-1 block">ສະກຸນເງິນ</label>
+          <div className="flex gap-2">
+            {CURRENCIES.map((c) => (
+              <button
+                key={c.code}
+                type="button"
+                onClick={() => setForm({ ...form, currency: c.code })}
+                className={`flex-1 py-2 rounded-xl text-sm font-medium transition active:scale-95 ${
+                  form.currency === c.code ? "gradient-btn text-white" : "card text-white/60"
+                }`}
+              >
+                {c.symbol} {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
-          <Field label="ລາຄາ (LAK)">
+          <Field label={`ລາຄາ (${form.currency})`}>
             <input value={form.price} onChange={set("price")} type="number" placeholder="2800000000" className={inp} />
           </Field>
           <Field label="ເນື້ອທີ່ (m²)">
