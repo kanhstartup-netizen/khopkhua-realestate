@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, Plus, Bot, Search, ChevronRight, MessageCircle } from "lucide-react";
+import { ChevronLeft, Plus, Bot, Search, ChevronRight, MessageCircle, Droplet, Paperclip } from "lucide-react";
 import * as Icons from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../context/Store";
@@ -201,22 +201,39 @@ export default function Staff() {
                     </li>
                   ))}
                 </ul>
+                {s.id === "legal" && (
+                  <p className="mt-1.5 text-[9px] text-emerald-400/80 flex items-center gap-1">
+                    <Paperclip size={9} /> ອັບໂຫລດ PDF/Word ໄດ້
+                  </p>
+                )}
                 <div className="mt-2.5 flex gap-1.5">
-                  <button
-                    onClick={() => navigate(`/staff/${s.id}/chat`)}
-                    className="flex-1 text-[11px] py-1.5 rounded-lg font-medium text-white active:scale-95 transition-transform hover:brightness-125 flex items-center justify-center gap-1"
-                    style={{ background: `${s.color}33` }}
-                  >
-                    <MessageCircle size={11} /> ຄຸຍນຳ
-                  </button>
-                  {(s.id === "finder" || s.id === "designer") && (
+                  {s.id === "designer" ? (
                     <button
-                      onClick={() => navigate(s.id === "finder" ? "/finder" : "/watermark")}
-                      aria-label={s.id === "finder" ? "ເບິ່ງຊັບທີ່ຄົ້ນພົບ" : "ໃສ່ລາຍນ້ຳ"}
-                      className="w-8 shrink-0 rounded-lg bg-white/5 flex items-center justify-center active:scale-90 transition-transform hover:bg-white/10"
+                      onClick={() => navigate("/watermark")}
+                      className="flex-1 text-[11px] py-1.5 rounded-lg font-medium text-white active:scale-95 transition-transform hover:brightness-125 flex items-center justify-center gap-1"
+                      style={{ background: `${s.color}33` }}
                     >
-                      <ChevronRight size={14} className="text-white/50" />
+                      <Droplet size={11} /> ໃສ່ລາຍນ້ຳ
                     </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => navigate(`/staff/${s.id}/chat`)}
+                        className="flex-1 text-[11px] py-1.5 rounded-lg font-medium text-white active:scale-95 transition-transform hover:brightness-125 flex items-center justify-center gap-1"
+                        style={{ background: `${s.color}33` }}
+                      >
+                        <MessageCircle size={11} /> ຄຸຍນຳ
+                      </button>
+                      {s.id === "finder" && (
+                        <button
+                          onClick={() => navigate("/finder")}
+                          aria-label="ເບິ່ງຊັບທີ່ຄົ້ນພົບ"
+                          className="w-8 shrink-0 rounded-lg bg-white/5 flex items-center justify-center active:scale-90 transition-transform hover:bg-white/10"
+                        >
+                          <ChevronRight size={14} className="text-white/50" />
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
