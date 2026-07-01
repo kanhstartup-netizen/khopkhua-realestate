@@ -1,6 +1,27 @@
 // Shared watermark rendering — used by both the Watermark page and Add Property.
 import { BRAND } from "../data/watermarks";
 
+// Facebook-recommended output sizes (best reach / no cropping).
+export const FB_SIZES = [
+  { id: "square", name: "ຮູບໂພສ ຈະຕຸລັດ 1:1", w: 1080, h: 1080, note: "ດີສຸດສຳລັບ Feed" },
+  { id: "portrait", name: "ແນວຕັ້ງ 4:5", w: 1080, h: 1350, note: "ກິນພື້ນທີ່ Feed ຫລາຍ" },
+  { id: "landscape", name: "ແນວນອນ 1.91:1", w: 1200, h: 628, note: "ລິ້ງ / ໂຄສະນາ" },
+  { id: "story", name: "Story / Reels 9:16", w: 1080, h: 1920, note: "Story, Reels, TikTok" },
+  { id: "original", name: "ຂະໜາດຕົ້ນສະບັບ", w: 0, h: 0, note: "ຮັກສາອັດຕາສ່ວນເດີມ" },
+];
+
+// CSS filter presets for quick enhancement.
+export const FILTERS = [
+  { id: "none", name: "ຕົ້ນສະບັບ", filter: "none" },
+  { id: "bright", name: "ສະຫວ່າງ", filter: "brightness(1.12) contrast(1.05)" },
+  { id: "sharp", name: "ຄົມຊັດ", filter: "contrast(1.2) saturate(1.1)" },
+  { id: "vivid", name: "ສົດໃສ", filter: "saturate(1.35) contrast(1.08) brightness(1.05)" },
+  { id: "sky", name: "ທ້ອງຟ້າສົດ", filter: "saturate(1.25) brightness(1.06) hue-rotate(-6deg)" },
+  { id: "warm", name: "ໂທນອຸ່ນ", filter: "sepia(0.18) saturate(1.2) brightness(1.05)" },
+  { id: "cool", name: "ໂທນເຢັນ", filter: "saturate(1.1) brightness(1.03) hue-rotate(8deg)" },
+  { id: "hdr", name: "HDR ຄົມ", filter: "contrast(1.28) saturate(1.3) brightness(1.04)" },
+];
+
 export function loadImg(src, crossOrigin) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -21,24 +42,62 @@ function rr(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
+// Draw the photo into a target box using "cover" fit (crop to fill, centered).
+function drawCover(ctx, img, dx, dy, dw, dh) {
+  const ir = img.width / img.height;
+  const br = dw / dh;
+  let sx, sy, sw, sh;
+  if (ir > br) {
+    sh = img.height;
+    sw = sh * br;
+    sx = (img.width - sw) / 2;
+    sy = 0;
+  } else {
+    sw = img.width;
+    sh = sw / br;
+    sx = 0;
+    sy = (img.height - sh) / 2;
+  }
+  ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+}
+
 // Draw photo + watermark template onto a canvas.
-export function drawWatermark(canvas, photoArg, tplArg, logo) {
+// opts: { size: FB_SIZES id, filter: CSS filter string }
+export function drawWatermark(canvas, photoArg, tplArg, logo, opts = {}) {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     const photo = photoArg;
     const tpl = tplArg;
 
-    // Output canvas keeps the photo's native ratio, capped at 1080 wide
-    const baseW = 1080;
-    const ratio = photo ? photo.height / photo.width : 1;
-    const W = baseW;
-    const H = photo ? Math.round(baseW * ratio) : Math.round(baseW * 0.66);
+    // Determine output dimensions from a size preset (Facebook-optimized) or original ratio.
+    const sizeId = opts.size || "square";
+    const preset = FB_SIZES.find((s) => s.id === sizeId) || FB_SIZES[0];
+    let W, H;
+    if (preset.w && preset.h) {
+      W = preset.w;
+      H = preset.h;
+    } else {
+      // original ratio, capped at 1080 wide
+      const baseW = 1080;
+      const ratio = photo ? photo.height / photo.width : 0.66;
+      W = baseW;
+      H = Math.round(baseW * ratio);
+    }
     canvas.width = W;
     canvas.height = H;
 
+    // apply enhancement filter to the photo only
+    const filter = opts.filter && opts.filter !== "none" ? opts.filter : null;
+
     // background / photo
     if (photo) {
-      ctx.drawImage(photo, 0, 0, W, H);
+      if (filter) ctx.filter = filter;
+      if (preset.w && preset.h) {
+        drawCover(ctx, photo, 0, 0, W, H); // crop-to-fill for fixed sizes
+      } else {
+        ctx.drawImage(photo, 0, 0, W, H);
+      }
+      ctx.filter = "none";
     } else {
       const g = ctx.createLinearGradient(0, 0, W, H);
       g.addColorStop(0, "#0a1428");
@@ -616,5 +675,153 @@ export function drawWatermark(canvas, photoArg, tplArg, logo) {
       ctx.font = `500 ${Math.round(ch * 0.16)}px 'Noto Sans Lao', sans-serif`;
       ctx.fillText("☎ " + BRAND.phones[0], tx, y + ch * 0.58);
       ctx.fillText("☎ " + BRAND.phones[1], tx, y + ch * 0.82);
+    }
+
+    // ===== center watermark styles =====
+    const centerText = (yLogo = 0.34, size = 0.05) => {
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.save();
+      ctx.shadowColor = "rgba(0,0,0,0.6)";
+      ctx.shadowBlur = 14;
+      const ls = W * 0.16;
+      if (logo) ctx.drawImage(logo, (W - ls) / 2, H * yLogo - ls / 2, ls, ls);
+      ctx.fillStyle = s.accent;
+      ctx.font = `700 ${Math.round(W * size)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText(BRAND.nameLao, W / 2, H * (yLogo + 0.13));
+      ctx.fillStyle = "#fff";
+      ctx.font = `600 ${Math.round(W * (size * 0.75))}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText(BRAND.nameEn, W / 2, H * (yLogo + 0.2));
+      ctx.font = `500 ${Math.round(W * (size * 0.6))}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText("☎ " + BRAND.phones.join("  •  "), W / 2, H * (yLogo + 0.27));
+      ctx.restore();
+      ctx.textAlign = "left";
+    };
+
+    if (s.style === "centerLogoName") {
+      centerText(0.32, 0.05);
+    }
+
+    if (s.style === "centerGlass") {
+      const bw = W * 0.72, bh = H * 0.42;
+      ctx.fillStyle = s.bg;
+      rr(ctx, (W - bw) / 2, (H - bh) / 2, bw, bh, 28);
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = s.accent + "88";
+      ctx.stroke();
+      centerText(0.34, 0.05);
+    }
+
+    if (s.style === "centerLines") {
+      const cy = H / 2;
+      ctx.strokeStyle = s.accent;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(W * 0.2, cy - H * 0.13);
+      ctx.lineTo(W * 0.8, cy - H * 0.13);
+      ctx.moveTo(W * 0.2, cy + H * 0.16);
+      ctx.lineTo(W * 0.8, cy + H * 0.16);
+      ctx.stroke();
+      centerText(0.36, 0.048);
+    }
+
+    if (s.style === "centerBigFaint") {
+      ctx.globalAlpha = 0.14;
+      const ls = W * 0.55;
+      if (logo) ctx.drawImage(logo, (W - ls) / 2, (H - ls) / 2, ls, ls);
+      ctx.globalAlpha = 1;
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.shadowColor = "rgba(0,0,0,0.6)";
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = "#fff";
+      ctx.font = `700 ${Math.round(W * 0.045)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText(`${BRAND.nameLao}  |  ${BRAND.nameEn}`, W / 2, H * 0.86);
+      ctx.fillStyle = s.accent;
+      ctx.font = `500 ${Math.round(W * 0.035)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText("☎ " + BRAND.phones.join("  •  "), W / 2, H * 0.92);
+      ctx.restore();
+      ctx.textAlign = "left";
+    }
+
+    if (s.style === "centerCircle") {
+      const r = W * 0.28;
+      ctx.fillStyle = s.bg;
+      ctx.beginPath();
+      ctx.arc(W / 2, H / 2, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = s.accent;
+      ctx.stroke();
+      centerText(0.36, 0.045);
+    }
+
+    if (s.style === "centerPro") {
+      const bh = H * 0.36;
+      ctx.fillStyle = s.bg;
+      ctx.fillRect(0, (H - bh) / 2, W, bh);
+      ctx.fillStyle = s.accent;
+      ctx.fillRect(0, (H - bh) / 2, W, 5);
+      ctx.fillRect(0, (H + bh) / 2 - 5, W, 5);
+      centerText(0.36, 0.05);
+    }
+
+    if (s.style === "centerHot") {
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = s.accent;
+      ctx.font = `800 ${Math.round(W * 0.08)}px 'Noto Sans Lao', sans-serif`;
+      ctx.shadowColor = "rgba(0,0,0,0.5)";
+      ctx.shadowBlur = 12;
+      ctx.fillText("🔥 ຂາຍດ່ວນ!", W / 2, H * 0.42);
+      ctx.restore();
+      centerText(0.52, 0.042);
+    }
+
+    if (s.style === "centerCool") {
+      const bw = W * 0.78, bh = H * 0.4;
+      const g = ctx.createLinearGradient((W - bw) / 2, 0, (W + bw) / 2, 0);
+      g.addColorStop(0, "rgba(6,182,212,0.25)");
+      g.addColorStop(1, "rgba(6,16,30,0.55)");
+      ctx.fillStyle = g;
+      rr(ctx, (W - bw) / 2, (H - bh) / 2, bw, bh, 24);
+      ctx.fill();
+      centerText(0.34, 0.048);
+    }
+
+    if (s.style === "centerGoldFrame") {
+      const m = W * 0.12;
+      ctx.strokeStyle = s.accent;
+      ctx.lineWidth = 4;
+      ctx.strokeRect(m, H / 2 - H * 0.2, W - m * 2, H * 0.4);
+      ctx.lineWidth = 1;
+      ctx.strokeRect(m + 8, H / 2 - H * 0.2 + 8, W - m * 2 - 16, H * 0.4 - 16);
+      centerText(0.36, 0.048);
+    }
+
+    if (s.style === "centerContact") {
+      const bw = W * 0.8, bh = H * 0.34;
+      ctx.fillStyle = s.bg;
+      rr(ctx, (W - bw) / 2, (H - bh) / 2, bw, bh, 22);
+      ctx.fill();
+      ctx.fillStyle = s.accent;
+      rr(ctx, (W - bw) / 2, (H - bh) / 2, bw, 6, 3);
+      ctx.fill();
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      const ls = W * 0.12;
+      if (logo) ctx.drawImage(logo, (W - ls) / 2, (H - bh) / 2 + 20, ls, ls);
+      ctx.fillStyle = s.accent;
+      ctx.font = `700 ${Math.round(W * 0.05)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText(BRAND.nameLao, W / 2, H / 2 + H * 0.03);
+      ctx.fillStyle = "#fff";
+      ctx.font = `600 ${Math.round(W * 0.045)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText("☎ " + BRAND.phones.join("  •  "), W / 2, H / 2 + H * 0.1);
+      ctx.restore();
+      ctx.textAlign = "left";
     }
 }

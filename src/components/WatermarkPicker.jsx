@@ -8,7 +8,7 @@ import {
 } from "react";
 import { ChevronLeft, ChevronRight, Download, Check } from "lucide-react";
 import { TEMPLATES } from "../data/watermarks";
-import { drawWatermark, loadImg } from "../lib/watermark";
+import { drawWatermark, loadImg, FB_SIZES, FILTERS } from "../lib/watermark";
 
 const LOGO_SRC = `${import.meta.env.BASE_URL}logo.png`;
 
@@ -33,8 +33,11 @@ const WatermarkPicker = forwardRef(function WatermarkPicker(
   const [fontReady, setFontReady] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [done, setDone] = useState(false);
+  const [sizeId, setSizeId] = useState("square");
+  const [filterId, setFilterId] = useState("none");
 
   const tpl = TEMPLATES[tplIdx];
+  const opts = { size: sizeId, filter: FILTERS.find((f) => f.id === filterId)?.filter };
 
   useEffect(() => {
     loadImg(LOGO_SRC).then(setLogo).catch(() => {});
@@ -68,9 +71,9 @@ const WatermarkPicker = forwardRef(function WatermarkPicker(
 
   const draw = useCallback(() => {
     if (canvasRef.current && photo) {
-      drawWatermark(canvasRef.current, photo, tpl, logo);
+      drawWatermark(canvasRef.current, photo, tpl, logo, opts);
     }
-  }, [photo, tpl, logo, fontReady]);
+  }, [photo, tpl, logo, fontReady, sizeId, filterId]);
 
   useEffect(() => {
     draw();
@@ -84,13 +87,13 @@ const WatermarkPicker = forwardRef(function WatermarkPicker(
     const off = document.createElement("canvas");
     const out = [];
     for (let i = 0; i < photos.length; i++) {
-      drawWatermark(off, photos[i], tpl, logo);
+      drawWatermark(off, photos[i], tpl, logo, opts);
       // give the canvas a moment to paint (text + logo) before capturing
       await new Promise((r) => setTimeout(r, 40));
       out.push(off.toDataURL("image/jpeg", 0.92));
     }
     return out;
-  }, [photos, tpl, logo]);
+  }, [photos, tpl, logo, sizeId, filterId]);
 
   // Expose a compose method the parent can call at save time (guarantees fresh watermark)
   useImperativeHandle(ref, () => ({
@@ -114,14 +117,14 @@ const WatermarkPicker = forwardRef(function WatermarkPicker(
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [photos, tpl, logo, fontReady, mode]);
+  }, [photos, tpl, logo, fontReady, mode, sizeId, filterId]);
 
   const downloadAll = async () => {
     if (!photos.length) return;
     setDownloading(true);
     const off = document.createElement("canvas");
     for (let i = 0; i < photos.length; i++) {
-      drawWatermark(off, photos[i], tpl, logo);
+      drawWatermark(off, photos[i], tpl, logo, opts);
       await new Promise((r) => setTimeout(r, 60));
       const blob = await new Promise((res) => off.toBlob(res, "image/jpeg", 0.92));
       const url = URL.createObjectURL(blob);
@@ -166,6 +169,42 @@ const WatermarkPicker = forwardRef(function WatermarkPicker(
           ))}
         </div>
       )}
+
+      {/* Size preset (Facebook-optimized) */}
+      <div className="mt-3">
+        <p className="text-[11px] text-white/55 mb-1.5">ຂະໜາດຮູບ (Facebook)</p>
+        <div className="flex gap-1.5 overflow-x-auto pb-1">
+          {FB_SIZES.map((sz) => (
+            <button
+              key={sz.id}
+              onClick={() => setSizeId(sz.id)}
+              className={`shrink-0 px-2.5 py-1.5 rounded-lg text-[10px] font-medium transition active:scale-95 ${
+                sizeId === sz.id ? "gradient-btn text-white" : "card text-white/60"
+              }`}
+            >
+              {sz.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="mt-2">
+        <p className="text-[11px] text-white/55 mb-1.5">ຟິວເຕີ / ປັບແຕ່ງ</p>
+        <div className="flex gap-1.5 overflow-x-auto pb-1">
+          {FILTERS.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setFilterId(f.id)}
+              className={`shrink-0 px-2.5 py-1.5 rounded-lg text-[10px] font-medium transition active:scale-95 ${
+                filterId === f.id ? "bg-brand-600 text-white" : "card text-white/60"
+              }`}
+            >
+              {f.name}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Template arrows */}
       <div className="flex items-center gap-2 mt-3">
