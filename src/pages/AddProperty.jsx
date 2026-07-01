@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { useStore } from "../context/Store";
+import { CURRENCIES } from "../data/seed";
 import WatermarkPicker from "../components/WatermarkPicker";
 
 const types = [
@@ -46,6 +47,7 @@ export default function AddProperty() {
     name: "",
     location: "",
     price: "",
+    currency: "LAK",
     area: "",
     beds: "",
     baths: "",
@@ -135,6 +137,7 @@ export default function AddProperty() {
       name: form.name,
       location: form.location,
       price: Number(form.price) || 0,
+      currency: form.currency || "LAK",
       area: Number(form.area) || 0,
       beds: Number(form.beds) || 0,
       baths: Number(form.baths) || 0,
@@ -302,8 +305,27 @@ export default function AddProperty() {
           )}
         </div>
 
+        {/* Currency selector */}
+        <div>
+          <label className="text-xs text-white/55 mb-1 block">ສະກຸນເງິນ</label>
+          <div className="flex gap-2">
+            {CURRENCIES.map((c) => (
+              <button
+                key={c.code}
+                type="button"
+                onClick={() => setForm({ ...form, currency: c.code })}
+                className={`flex-1 py-2 rounded-xl text-sm font-medium transition active:scale-95 ${
+                  form.currency === c.code ? "gradient-btn text-white" : "card text-white/60"
+                }`}
+              >
+                {c.symbol} {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
-          <Field label="ລາຄາ (LAK)">
+          <Field label={`ລາຄາ (${form.currency})`}>
             <input value={form.price} onChange={set("price")} type="number" placeholder="2800000000" className={inp} />
           </Field>
           <Field label="ເນື້ອທີ່ (m²)">

@@ -25,6 +25,24 @@ export default function Watermark() {
   const [downloaded, setDownloaded] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [fontReady, setFontReady] = useState(false);
+  const [cat, setCat] = useState("all"); // template category filter
+
+  // categorize templates by id prefix / style
+  const catOf = (t) => {
+    if (t.style === "sold" || /^s\d/.test(t.id) || /SOLD|ຂາຍແລ້ວ|ປິດການຂາຍ/.test(t.name))
+      return "sold";
+    if (/^c\d/.test(t.id) || (t.style && t.style.startsWith("center"))) return "center";
+    return "general";
+  };
+  const CATS = [
+    { id: "all", label: "ທັງໝົດ" },
+    { id: "general", label: "ທົ່ວໄປ" },
+    { id: "sold", label: "ຂາຍແລ້ວ/SOLD" },
+    { id: "center", label: "ກາງຮູບ" },
+  ];
+  const visibleTemplates = TEMPLATES.filter(
+    (t) => cat === "all" || catOf(t) === cat
+  );
 
   const photo = photos[activeIdx] || null;
 
@@ -236,15 +254,36 @@ export default function Watermark() {
       {/* Templates */}
       <div className="px-5 mt-4">
         <p className="font-semibold text-white mb-3 flex items-center gap-2">
-          <ImageIcon size={16} className="text-gold" /> ເລືອກຮູບແບບ
+          <ImageIcon size={16} className="text-gold" /> ເລືອກຮູບແບບລາຍນ້ຳ
         </p>
+
+        {/* Category tabs (folders) */}
+        <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
+          {CATS.map((c) => {
+            const count =
+              c.id === "all"
+                ? TEMPLATES.length
+                : TEMPLATES.filter((t) => catOf(t) === c.id).length;
+            return (
+              <button
+                key={c.id}
+                onClick={() => setCat(c.id)}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition active:scale-95 ${
+                  cat === c.id ? "gradient-btn text-white" : "card text-white/60"
+                }`}
+              >
+                {c.label} <span className="opacity-70">({count})</span>
+              </button>
+            );
+          })}
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
-          {TEMPLATES.map((t, i) => (
+          {visibleTemplates.map((t, i) => (
             <button
               key={t.id}
               onClick={() => setTpl(t)}
-              style={{ animationDelay: `${i * 35}ms` }}
-              className={`card p-3 text-left fade-up transition-all duration-200 active:scale-95 relative ${
+              className={`card p-3 text-left transition-all duration-200 active:scale-95 relative ${
                 tpl.id === t.id ? "border-violet-500 ring-1 ring-violet-500/50" : "hover:border-white/20"
               }`}
             >
@@ -260,7 +299,6 @@ export default function Watermark() {
                 <div className="w-full h-2.5 rounded" style={{ background: t.accent, opacity: 0.85 }} />
               </div>
               <p className="text-[11px] text-white/80 font-medium">{t.name}</p>
-              <p className="text-[9px] text-white/40">ແບບ {i + 1}</p>
             </button>
           ))}
         </div>

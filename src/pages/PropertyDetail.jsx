@@ -20,7 +20,7 @@ import {
   Phone,
 } from "lucide-react";
 import { useStore } from "../context/Store";
-import { fmtLAK } from "../data/seed";
+import { fmtMoney, CURRENCIES } from "../data/seed";
 
 const PHONES = ["020 55355 347", "020 9169 4499"];
 const typeLabels = { land: "ດິນ", house: "ເຮືອນ", building: "ອາຄານ", other: "ອື່ນໆ" };
@@ -45,6 +45,7 @@ export default function PropertyDetail() {
           name: p.name || "",
           location: p.location || "",
           price: p.price || "",
+          currency: p.currency || "LAK",
           area: p.area || "",
           beds: p.beds || "",
           baths: p.baths || "",
@@ -69,7 +70,7 @@ export default function PropertyDetail() {
 
   const shareText = `🏠 ${p.name}
 📍 ${p.location}
-💰 ${fmtLAK(p.price)}
+💰 ${fmtMoney(p.price, p.currency)}
 📐 ${p.area} m²${p.beds ? `\n🛏 ${p.beds} ຫ້ອງນອນ` : ""}${p.baths ? `\n🚿 ${p.baths} ຫ້ອງນ້ຳ` : ""}
 ${p.desc ? `\n${p.desc}` : ""}
 ${p.mapUrl ? `\n🗺 ${p.mapUrl}` : ""}
@@ -100,6 +101,7 @@ ${p.mapUrl ? `\n🗺 ${p.mapUrl}` : ""}
       name: form.name,
       location: form.location,
       price: Number(form.price) || 0,
+      currency: form.currency,
       area: Number(form.area) || 0,
       beds: Number(form.beds) || 0,
       baths: Number(form.baths) || 0,
@@ -232,7 +234,7 @@ ${p.mapUrl ? `\n🗺 ${p.mapUrl}` : ""}
             <MapPin size={14} className="text-brand-400" /> {p.location || "—"}
           </p>
           <div className="flex items-end justify-between mt-3">
-            <p className="text-2xl gold-text font-extrabold">{fmtLAK(p.price)}</p>
+            <p className="text-2xl gold-text font-extrabold">{fmtMoney(p.price, p.currency)}</p>
             <span className="text-[11px] text-white/40">ລະຫັດ #{p.id.slice(-5)}</span>
           </div>
         </div>
@@ -391,9 +393,26 @@ ${p.mapUrl ? `\n🗺 ${p.mapUrl}` : ""}
                 <label className="text-xs text-white/55 mb-1 block">ທຳເລ</label>
                 <input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} className={inp} />
               </div>
+              <div>
+                <label className="text-xs text-white/55 mb-1 block">ສະກຸນເງິນ</label>
+                <div className="flex gap-2">
+                  {CURRENCIES.map((c) => (
+                    <button
+                      key={c.code}
+                      type="button"
+                      onClick={() => setForm({ ...form, currency: c.code })}
+                      className={`flex-1 py-2 rounded-xl text-sm font-medium transition active:scale-95 ${
+                        form.currency === c.code ? "gradient-btn text-white" : "card text-white/60"
+                      }`}
+                    >
+                      {c.symbol} {c.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-white/55 mb-1 block">ລາຄາ (LAK)</label>
+                  <label className="text-xs text-white/55 mb-1 block">ລາຄາ ({form.currency})</label>
                   <input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className={inp} />
                 </div>
                 <div>

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, SlidersHorizontal, ChevronRight, Bed, Bath, Trash2, MapPin } from "lucide-react";
 import { PageHeader } from "../components/Shell";
 import { useStore } from "../context/Store";
-import { fmtLAK } from "../data/seed";
+import { fmtMoney } from "../data/seed";
 
 const tabs = [
   { key: "all", label: "ທັງໝົດ" },
@@ -112,7 +112,7 @@ export default function Properties() {
                 <p className="text-[11px] text-white/55 mt-1">{p.area} m²</p>
               )}
               <div className="flex items-center justify-between mt-1.5">
-                <p className="text-sm gold-text font-bold">{fmtLAK(p.price)}</p>
+                <p className="text-sm gold-text font-bold">{fmtMoney(p.price, p.currency)}</p>
                 <span className="bg-brand-600/20 text-brand-400 text-[9px] px-2 py-0.5 rounded-md">
                   {p.status}
                 </span>

@@ -138,6 +138,21 @@ export const perfData = [
 export const fmtLAK = (n) =>
   new Intl.NumberFormat("lo-LA").format(n) + " ກີບ";
 
+// Supported currencies
+export const CURRENCIES = [
+  { code: "LAK", label: "ກີບ", symbol: "₭", locale: "lo-LA" },
+  { code: "THB", label: "ບາດ", symbol: "฿", locale: "th-TH" },
+  { code: "USD", label: "ໂດລາ", symbol: "$", locale: "en-US" },
+];
+
+// Format an amount with a given currency code (defaults to LAK).
+export const fmtMoney = (n, code = "LAK") => {
+  const c = CURRENCIES.find((x) => x.code === code) || CURRENCIES[0];
+  const num = new Intl.NumberFormat(c.locale).format(n || 0);
+  if (c.code === "USD") return `$${num}`;
+  return `${num} ${c.label}`;
+};
+
 // ຊັບສິນທີ່ທີມ AI ຄົ້ນຫາພົບ (ລໍຖ້າອະນຸມັດເຂົ້າແອັບ)
 export const seedFoundLeads = [
   {
