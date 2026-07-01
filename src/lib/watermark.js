@@ -22,6 +22,17 @@ export const FILTERS = [
   { id: "hdr", name: "HDR ຄົມ", filter: "contrast(1.28) saturate(1.3) brightness(1.04)" },
 ];
 
+// Pick the best Facebook size for a given photo (least cropping + good reach).
+export function bestSizeFor(img) {
+  if (!img) return "square";
+  const r = img.width / img.height;
+  if (r >= 1.5) return "landscape"; // wide photo -> 1.91:1
+  if (r >= 1.15) return "square"; // slightly wide -> 1:1
+  if (r >= 0.9) return "square"; // near square -> 1:1
+  if (r >= 0.7) return "portrait"; // tall -> 4:5
+  return "story"; // very tall -> 9:16
+}
+
 export function loadImg(src, crossOrigin) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -42,21 +53,22 @@ function rr(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-// Draw the photo into a target box using "cover" fit (crop to fill, centered).
-function drawCover(ctx, img, dx, dy, dw, dh) {
+// Draw the photo into a target box using "cover" fit (crop to fill).
+// focusX/focusY in [0,1] shift which part is visible (0.5 = center).
+function drawCover(ctx, img, dx, dy, dw, dh, focusX = 0.5, focusY = 0.5) {
   const ir = img.width / img.height;
   const br = dw / dh;
   let sx, sy, sw, sh;
   if (ir > br) {
     sh = img.height;
     sw = sh * br;
-    sx = (img.width - sw) / 2;
+    sx = (img.width - sw) * focusX;
     sy = 0;
   } else {
     sw = img.width;
     sh = sw / br;
     sx = 0;
-    sy = (img.height - sh) / 2;
+    sy = (img.height - sh) * focusY;
   }
   ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
 }
@@ -93,7 +105,9 @@ export function drawWatermark(canvas, photoArg, tplArg, logo, opts = {}) {
     if (photo) {
       if (filter) ctx.filter = filter;
       if (preset.w && preset.h) {
-        drawCover(ctx, photo, 0, 0, W, H); // crop-to-fill for fixed sizes
+        const fx = opts.focusX ?? 0.5;
+        const fy = opts.focusY ?? 0.5;
+        drawCover(ctx, photo, 0, 0, W, H, fx, fy); // crop-to-fill for fixed sizes
       } else {
         ctx.drawImage(photo, 0, 0, W, H);
       }
