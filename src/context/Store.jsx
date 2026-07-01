@@ -20,6 +20,14 @@ export function StoreProvider({ children }) {
   const [leads, setLeads] = useState(() => load("kk_leads", seedFoundLeads));
   // images passed to the Watermark page (not persisted)
   const [pendingImages, setPendingImages] = useState([]);
+  // AI settings (n8n webhook endpoints)
+  const [settings, setSettings] = useState(() =>
+    load("kk_settings", { chatWebhook: "", contentWebhook: "" })
+  );
+
+  useEffect(() => {
+    localStorage.setItem("kk_settings", JSON.stringify(settings));
+  }, [settings]);
 
   useEffect(() => {
     localStorage.setItem("kk_properties", JSON.stringify(properties));
@@ -36,6 +44,11 @@ export function StoreProvider({ children }) {
 
   const removeProperty = (id) =>
     setProperties((prev) => prev.filter((p) => p.id !== id));
+
+  const updateProperty = (id, patch) =>
+    setProperties((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, ...patch } : p))
+    );
 
   const addTask = (t) =>
     setTasks((prev) => [{ ...t, id: "t" + Date.now(), progress: 0 }, ...prev]);
@@ -89,6 +102,7 @@ export function StoreProvider({ children }) {
         properties,
         addProperty,
         removeProperty,
+        updateProperty,
         tasks,
         addTask,
         leads,
@@ -97,6 +111,8 @@ export function StoreProvider({ children }) {
         simulateFind,
         pendingImages,
         setPendingImages,
+        settings,
+        setSettings,
       }}
     >
       {children}
