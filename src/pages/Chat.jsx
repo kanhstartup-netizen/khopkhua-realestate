@@ -10,15 +10,12 @@ import {
   Loader2,
   Trash2,
   AlertTriangle,
-  Paperclip,
-  FileText,
-  X,
 } from "lucide-react";
 import { useStore } from "../context/Store";
 import { aiStaff } from "../data/seed";
 import { hasApiKey, sendToClaude } from "../lib/ai";
 
-function Bubble({ role, content, color, pending, attachment }) {
+function Bubble({ role, content, color, pending }) {
   const isUser = role === "user";
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"} gap-2`}>
@@ -37,16 +34,6 @@ function Bubble({ role, content, color, pending, attachment }) {
             : "card text-white/90 rounded-bl-md"
         }`}
       >
-        {attachment && (
-          <div
-            className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 mb-2 text-[11px] ${
-              isUser ? "bg-white/15" : "bg-white/5"
-            }`}
-          >
-            <FileText size={13} className="shrink-0" />
-            <span className="truncate">{attachment}</span>
-          </div>
-        )}
         {pending ? (
           <span className="flex items-center gap-1.5 text-white/50">
             <Loader2 size={13} className="animate-spin" /> ກຳລັງພິມ...
@@ -74,13 +61,8 @@ export default function Chat() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [confirmClear, setConfirmClear] = useState(false);
-  const [pendingFile, setPendingFile] = useState(null); // { name, text, pages, type }
-  const [extracting, setExtracting] = useState(false);
-  const [fileError, setFileError] = useState("");
   const scrollRef = useRef(null);
-  const fileInputRef = useRef(null);
   const keyReady = hasApiKey();
-  const supportsUpload = staff?.id === "legal";
 
   const history = staff ? getChat(staff.id) : [];
 
@@ -101,38 +83,9 @@ export default function Chat() {
 
   const Icon = Icons[staff.icon] || Bot;
 
-  const onFileSelected = async (e) => {
-    const file = e.target.files?.[0];
-    e.target.value = ""; // ໃຫ້ເລືອກໄຟລ໌ດຽວກັນຊ້ຳໄດ້
-    if (!file) return;
-    setFileError("");
-    setExtracting(true);
-    try {
-      const { extractDocument } = await import("../lib/docParser");
-      const doc = await extractDocument(file);
-      if (!doc.text) {
-        setFileError("ອ່ານເອກະສານນີ້ບໍ່ພົບຂໍ້ຄວາມ (ອາດເປັນຮູບສະແກນ).");
-      } else {
-        setPendingFile(doc);
-      }
-    } catch (err) {
-      if (err.code === "UNSUPPORTED_DOC") {
-        setFileError("ໄຟລ໌ .doc ເກົ່າຍັງບໍ່ຮອງຮັບ — ກະລຸນາໃຊ້ .docx ຫລື .pdf");
-      } else if (err.code === "UNSUPPORTED_TYPE") {
-        setFileError("ຮອງຮັບສະເພາະໄຟລ໌ PDF, Word (.docx), ຫລື .txt");
-      } else {
-        setFileError("ອ່ານໄຟລ໌ບໍ່ສຳເລັດ, ລອງໄຟລ໌ອື່ນ.");
-      }
-    } finally {
-      setExtracting(false);
-    }
-  };
-
-  const removePendingFile = () => setPendingFile(null);
-
   const submit = async () => {
     const text = input.trim();
-    if ((!text && !pendingFile) || sending) return;
+    if (!text || sending) return;
 
     if (!hasApiKey()) {
       setError("NO_KEY");
@@ -140,30 +93,15 @@ export default function Chat() {
     }
 
     setError("");
-    const attachment = pendingFile;
-    const userVisibleText = text || `ກະລຸນາອ່ານ ແລະ ວິເຄາະເອກະສານນີ້: ${attachment?.name}`;
-
-    // ຂໍ້ຄວາມສົ່ງໄປ API ຈະລວມເນື້ອຫາເອກະສານ (ຖ້າມີ) ແຕ່ bubble ໃນຈໍສະແດງພຽງຄຳຖາມ
-    const apiText = attachment
-      ? `${userVisibleText}\n\n[ເອກະສານ: ${attachment.name}]\n${attachment.text}`
-      : userVisibleText;
-
-    const userMsg = {
-      role: "user",
-      content: userVisibleText,
-      apiContent: apiText,
-      attachment: attachment?.name,
-      ts: Date.now(),
-    };
+    const userMsg = { role: "user", content: text, ts: Date.now() };
     addChatMessage(staff.id, userMsg);
     setInput("");
-    setPendingFile(null);
     setSending(true);
 
     try {
       const nextHistory = [...history, userMsg];
       const reply = await sendToClaude(
-        nextHistory.map((m) => ({ role: m.role, content: m.apiContent || m.content })),
+        nextHistory.map((m) => ({ role: m.role, content: m.content })),
         staff.systemPrompt
       );
       addChatMessage(staff.id, { role: "assistant", content: reply, ts: Date.now() });
@@ -275,65 +213,14 @@ export default function Chat() {
         {/* Greeting bubble always shown first */}
         <Bubble role="assistant" content={staff.greeting} color={staff.color} />
         {history.map((m, i) => (
-          <Bubble key={i} role={m.role} content={m.content} color={staff.color} attachment={m.attachment} />
+          <Bubble key={i} role={m.role} content={m.content} color={staff.color} />
         ))}
         {sending && <Bubble role="assistant" content="" color={staff.color} pending />}
       </div>
 
-      {/* Pending file preview */}
-      {supportsUpload && (pendingFile || extracting || fileError) && (
-        <div className="px-5 pb-1 fade-up">
-          {extracting && (
-            <div className="glass rounded-xl px-3 py-2.5 flex items-center gap-2 text-xs text-white/60">
-              <Loader2 size={14} className="animate-spin" /> ກຳລັງອ່ານເອກະສານ...
-            </div>
-          )}
-          {pendingFile && !extracting && (
-            <div className="glass rounded-xl px-3 py-2.5 flex items-center gap-2">
-              <FileText size={15} className="text-brand-400 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-white/85 truncate">{pendingFile.name}</p>
-                <p className="text-[10px] text-white/45">
-                  {pendingFile.pages ? `${pendingFile.pages} ໜ້າ · ` : ""}ພ້ອມສົ່ງ
-                </p>
-              </div>
-              <button
-                onClick={removePendingFile}
-                aria-label="ເອົາໄຟລ໌ອອກ"
-                className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/10 active:scale-90 transition-all shrink-0"
-              >
-                <X size={13} className="text-white/50" />
-              </button>
-            </div>
-          )}
-          {fileError && !extracting && (
-            <p className="text-[10px] text-rose-400 mt-1.5 px-1">{fileError}</p>
-          )}
-        </div>
-      )}
-
       {/* Input bar */}
       <div className="px-5 pt-3 pb-1 sticky bottom-0">
         <div className="glass rounded-2xl p-2 flex items-end gap-2">
-          {supportsUpload && (
-            <>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
-                onChange={onFileSelected}
-                className="hidden"
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={extracting}
-                aria-label="ອັບໂຫລດເອກະສານ"
-                className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0 active:scale-90 transition-all hover:bg-white/10 disabled:opacity-40"
-              >
-                <Paperclip size={17} className="text-white/60" />
-              </button>
-            </>
-          )}
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -344,7 +231,7 @@ export default function Chat() {
           />
           <button
             onClick={submit}
-            disabled={(!input.trim() && !pendingFile) || sending}
+            disabled={!input.trim() || sending}
             aria-label="ສົ່ງ"
             className="w-10 h-10 rounded-xl gradient-btn flex items-center justify-center shrink-0 active:scale-90 transition-all disabled:opacity-40 disabled:active:scale-100"
           >
