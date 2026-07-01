@@ -9,6 +9,7 @@ import {
   Link2,
   Loader2,
   X,
+  Droplet,
 } from "lucide-react";
 import { useStore } from "../context/Store";
 
@@ -39,7 +40,7 @@ function parseLatLng(url) {
 
 export default function AddProperty() {
   const navigate = useNavigate();
-  const { addProperty } = useStore();
+  const { addProperty, setPendingImages } = useStore();
   const [type, setType] = useState("land");
   const [form, setForm] = useState({
     name: "",
@@ -214,6 +215,19 @@ export default function AddProperty() {
               />
             </label>
           </div>
+        )}
+
+        {/* Send uploaded images to watermark */}
+        {images.length > 0 && (
+          <button
+            onClick={() => {
+              setPendingImages(images);
+              navigate("/watermark");
+            }}
+            className="w-full mt-3 card py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm text-white font-medium active:scale-95 transition hover:border-brand-400/40"
+          >
+            <Droplet size={16} className="text-brand-400" /> ໃສ່ລາຍນ້ຳຮູບເຫລົ່ານີ້ ({images.length} ຮູບ)
+          </button>
         )}
       </div>
 

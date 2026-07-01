@@ -9,6 +9,7 @@ import {
   X,
 } from "lucide-react";
 import { BRAND, TEMPLATES } from "../data/watermarks";
+import { useStore } from "../context/Store";
 
 const LOGO_SRC = `${import.meta.env.BASE_URL}logo.png`;
 
@@ -36,6 +37,7 @@ function rr(ctx, x, y, w, h, r) {
 
 export default function Watermark() {
   const navigate = useNavigate();
+  const { pendingImages, setPendingImages } = useStore();
   const canvasRef = useRef(null);
   const [photos, setPhotos] = useState([]); // HTMLImageElement[]
   const [activeIdx, setActiveIdx] = useState(0);
@@ -50,6 +52,17 @@ export default function Watermark() {
   // preload logo
   useEffect(() => {
     loadImg(LOGO_SRC).then(setLogo).catch(() => {});
+  }, []);
+
+  // If images were sent from "Add Property", load them here then clear
+  useEffect(() => {
+    if (pendingImages && pendingImages.length) {
+      Promise.all(pendingImages.map((src) => loadImg(src))).then((imgs) => {
+        setPhotos((prev) => [...prev, ...imgs]);
+        setPendingImages([]);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Ensure Noto Sans Lao is loaded before drawing on canvas

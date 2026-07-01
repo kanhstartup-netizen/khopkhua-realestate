@@ -18,6 +18,8 @@ export function StoreProvider({ children }) {
   );
   const [tasks, setTasks] = useState(() => load("kk_tasks", seedTasks));
   const [leads, setLeads] = useState(() => load("kk_leads", seedFoundLeads));
+  // images passed to the Watermark page (not persisted)
+  const [pendingImages, setPendingImages] = useState([]);
 
   useEffect(() => {
     localStorage.setItem("kk_properties", JSON.stringify(properties));
@@ -93,6 +95,8 @@ export function StoreProvider({ children }) {
         approveLead,
         rejectLead,
         simulateFind,
+        pendingImages,
+        setPendingImages,
       }}
     >
       {children}
