@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Search, SlidersHorizontal, ChevronRight, Bed, Bath, Trash2 } from "lucide-react";
-import { StatusBar, PageHeader } from "../components/Shell";
+import { Search, SlidersHorizontal, ChevronRight, Bed, Bath, Trash2, MapPin } from "lucide-react";
+import { PageHeader } from "../components/Shell";
 import { useStore } from "../context/Store";
 import { fmtLAK } from "../data/seed";
 
@@ -30,8 +30,7 @@ export default function Properties() {
     t === "all" ? properties.length : properties.filter((p) => p.type === t).length;
 
   return (
-    <div className="fade-up">
-      <StatusBar />
+    <div className="fade-up pt-3">
       <PageHeader title="ຊັບສິນ" badge={0} />
 
       {/* Search */}
@@ -115,12 +114,25 @@ export default function Properties() {
                   {p.status}
                 </span>
               </div>
-              <button
-                onClick={() => removeProperty(p.id)}
-                className="text-[10px] text-rose-400/70 flex items-center gap-1 mt-1 active:scale-95 transition-transform"
-              >
-                <Trash2 size={11} /> ລຶບ
-              </button>
+              <div className="flex items-center gap-3 mt-1">
+                {p.mapUrl && (
+                  <a
+                    href={p.mapUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-[10px] text-brand-400 flex items-center gap-1 active:scale-95 transition-transform"
+                  >
+                    <MapPin size={11} /> ເບິ່ງແຜນທີ່
+                  </a>
+                )}
+                <button
+                  onClick={() => removeProperty(p.id)}
+                  className="text-[10px] text-rose-400/70 flex items-center gap-1 active:scale-95 transition-transform"
+                >
+                  <Trash2 size={11} /> ລຶບ
+                </button>
+              </div>
             </div>
           </div>
         ))}

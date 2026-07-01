@@ -12,19 +12,6 @@ export function PhoneShell({ children }) {
   );
 }
 
-export function StatusBar() {
-  return (
-    <div className="flex items-center justify-between px-5 pt-3 text-xs text-white/70">
-      <span className="font-semibold">9:41</span>
-      <div className="flex items-center gap-1.5">
-        <span>●●●</span>
-        <span>📶</span>
-        <span>🔋</span>
-      </div>
-    </div>
-  );
-}
-
 /**
  * Shared, polished page header used across screens.
  * - logo glints, title gets a soft gradient underline

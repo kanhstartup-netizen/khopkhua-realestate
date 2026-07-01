@@ -15,7 +15,6 @@ import {
   RefreshCw,
   Sparkles,
 } from "lucide-react";
-import { StatusBar } from "../components/Shell";
 import { useStore } from "../context/Store";
 import { fmtLAK } from "../data/seed";
 
@@ -55,8 +54,7 @@ export default function Finder() {
   };
 
   return (
-    <div className="fade-up">
-      <StatusBar />
+    <div className="fade-up pt-3">
       {/* Header */}
       <div className="px-5 pt-4 flex items-center gap-3">
         <button

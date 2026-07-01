@@ -14,7 +14,7 @@ import {
   Search,
   Droplet,
 } from "lucide-react";
-import { StatusBar, PageHeader } from "../components/Shell";
+import { PageHeader } from "../components/Shell";
 import { useStore } from "../context/Store";
 import { fmtLAK } from "../data/seed";
 
@@ -52,8 +52,7 @@ export default function Dashboard() {
   const recent = properties[0];
 
   return (
-    <div className="fade-up">
-      <StatusBar />
+    <div className="fade-up pt-3">
       <PageHeader subtitle="ຍິນດີຕ້ອນຮັບກັບມາ," title="ທີມ Khopkhua 👋" />
 
       {/* Overview */}

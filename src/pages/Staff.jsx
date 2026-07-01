@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ChevronLeft, Plus, Bot, Search, ChevronRight } from "lucide-react";
 import * as Icons from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { StatusBar } from "../components/Shell";
 import { useStore } from "../context/Store";
 import { aiStaff } from "../data/seed";
 
@@ -44,8 +43,7 @@ export default function Staff() {
   };
 
   return (
-    <div className="fade-up">
-      <StatusBar />
+    <div className="fade-up pt-3">
       <div className="px-5 pt-4 flex items-center gap-3">
         <button
           onClick={() => navigate(-1)}

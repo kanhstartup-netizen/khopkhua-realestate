@@ -7,7 +7,6 @@ import {
   ImageIcon,
   Check,
 } from "lucide-react";
-import { StatusBar } from "../components/Shell";
 import { BRAND, TEMPLATES } from "../data/watermarks";
 
 const LOGO_SRC = `${import.meta.env.BASE_URL}logo.png`;
@@ -372,6 +371,308 @@ export default function Watermark() {
       ctx.fillStyle = "rgba(255,255,255,0.85)";
       ctx.fillText("☎ " + phoneText, tx, y + barH * 0.85);
     }
+
+    // ===== Reusable bottom brand bar for SOLD variants =====
+    const brandBar = (barColor = "rgba(6,16,30,0.8)", lineColor = "#e8b840") => {
+      const barH = Math.round(H * 0.15);
+      const y = H - barH;
+      ctx.fillStyle = barColor;
+      ctx.fillRect(0, y, W, barH);
+      ctx.fillStyle = lineColor;
+      ctx.fillRect(0, y, W, 5);
+      const logoSize = barH * 0.66;
+      drawLogo(pad, y + (barH - logoSize) / 2, logoSize);
+      const tx = pad + logoSize + pad * 0.6;
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#fff";
+      ctx.font = `700 ${Math.round(barH * 0.27)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText(BRAND.nameLao, tx, y + barH * 0.34);
+      ctx.font = `600 ${Math.round(barH * 0.21)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText(BRAND.nameEn, tx, y + barH * 0.63);
+      ctx.font = `500 ${Math.round(barH * 0.19)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillStyle = "rgba(255,255,255,0.85)";
+      ctx.fillText("☎ " + phoneText, tx, y + barH * 0.87);
+    };
+
+    // S1/S2/S3 — SOLD ribbon in the CENTER (color from accent), text color from s.text
+    if (s.style === "soldCenter") {
+      ctx.fillStyle = "rgba(0,0,0,0.3)";
+      ctx.fillRect(0, 0, W, H);
+      ctx.save();
+      ctx.translate(W / 2, H * 0.42);
+      ctx.rotate(-Math.PI / 9);
+      const ribbonH = Math.round(H * 0.19);
+      const ribbonW = W * 1.5;
+      ctx.fillStyle = s.accent;
+      ctx.fillRect(-ribbonW / 2, -ribbonH / 2, ribbonW, ribbonH);
+      ctx.strokeStyle = "rgba(255,255,255,0.85)";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(-ribbonW / 2, -ribbonH / 2 + 8, ribbonW, ribbonH - 16);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = s.text;
+      ctx.font = `800 ${Math.round(ribbonH * 0.46)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText("ປິດການຂາຍແລ້ວ  •  SOLD", 0, 0);
+      ctx.restore();
+      brandBar(s.bg, s.accent);
+    }
+
+    // S4/S5 — SOLD ribbon in the top-right CORNER
+    if (s.style === "soldCorner") {
+      const size = W * 0.42;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(W - size, 0, size, size);
+      ctx.clip();
+      ctx.translate(W - size / 2, size / 2);
+      ctx.rotate(Math.PI / 4);
+      const ribbonH = Math.round(size * 0.26);
+      ctx.fillStyle = s.accent;
+      ctx.fillRect(-size, -ribbonH / 2, size * 2, ribbonH);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = s.text;
+      ctx.font = `800 ${Math.round(ribbonH * 0.5)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText("SOLD ຂາຍແລ້ວ", 0, 0);
+      ctx.restore();
+      brandBar(s.bg, s.accent);
+    }
+
+    // S6/S7 — round SOLD stamp in center
+    if (s.style === "soldCircle") {
+      ctx.fillStyle = "rgba(0,0,0,0.28)";
+      ctx.fillRect(0, 0, W, H);
+      const cx = W / 2, cy = H * 0.42, r = Math.min(W, H) * 0.2;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(-Math.PI / 12);
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.fillStyle = s.accent;
+      ctx.fill();
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = "rgba(255,255,255,0.9)";
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.82, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = s.text;
+      ctx.font = `800 ${Math.round(r * 0.42)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText("SOLD", 0, -r * 0.15);
+      ctx.font = `700 ${Math.round(r * 0.24)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText("ຂາຍແລ້ວ", 0, r * 0.32);
+      ctx.restore();
+      brandBar(s.bg, s.accent);
+    }
+
+    // S8 — full-width red SOLD bar across middle
+    if (s.style === "soldFullBar") {
+      ctx.fillStyle = "rgba(0,0,0,0.3)";
+      ctx.fillRect(0, 0, W, H);
+      const barH = Math.round(H * 0.16);
+      const y = H * 0.4 - barH / 2;
+      ctx.fillStyle = s.bg;
+      ctx.fillRect(0, y, W, barH);
+      ctx.fillStyle = "rgba(255,255,255,0.9)";
+      ctx.fillRect(0, y, W, 4);
+      ctx.fillRect(0, y + barH - 4, W, 4);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#fff";
+      ctx.font = `800 ${Math.round(barH * 0.5)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText("ປິດການຂາຍແລ້ວ  •  SOLD", W / 2, y + barH / 2);
+      brandBar("rgba(6,16,30,0.8)", "#e8b840");
+    }
+
+    // S9 — outline SOLD stamp (transparent, just red outlined text)
+    if (s.style === "soldStampOutline") {
+      ctx.save();
+      ctx.translate(W / 2, H * 0.4);
+      ctx.rotate(-Math.PI / 12);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = s.accent;
+      ctx.font = `800 ${Math.round(W * 0.13)}px 'Noto Sans Lao', sans-serif`;
+      ctx.strokeText("SOLD", 0, 0);
+      ctx.fillStyle = "rgba(239,68,68,0.25)";
+      ctx.fillText("SOLD", 0, 0);
+      ctx.font = `700 ${Math.round(W * 0.05)}px 'Noto Sans Lao', sans-serif`;
+      ctx.strokeStyle = s.accent;
+      ctx.lineWidth = 3;
+      ctx.strokeText("ປິດການຂາຍແລ້ວ", 0, W * 0.1);
+      ctx.restore();
+      brandBar("rgba(6,16,30,0.8)", s.accent);
+    }
+
+    // S10 — professional: red badge top-left + brand bar
+    if (s.style === "soldPro") {
+      const bw = W * 0.34, bh = H * 0.1;
+      const x = pad, y = pad;
+      ctx.fillStyle = s.accent;
+      rr(ctx, x, y, bw, bh, 14);
+      ctx.fill();
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#fff";
+      ctx.font = `800 ${Math.round(bh * 0.42)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText("ຂາຍແລ້ວ SOLD", x + bw / 2, y + bh / 2);
+      ctx.textAlign = "left";
+      brandBar(s.bg, s.accent);
+    }
+
+    // ===== 10 general styles (portrait + landscape safe) =====
+
+    // corner status badge helper (top-right pill)
+    const cornerBadge = (label, color) => {
+      ctx.save();
+      ctx.font = `800 ${Math.round(W * 0.032)}px 'Noto Sans Lao', sans-serif`;
+      const tw = ctx.measureText(label).width;
+      const bw = tw + W * 0.06;
+      const bh = W * 0.06;
+      const x = W - bw - pad;
+      const y = pad;
+      ctx.fillStyle = color;
+      rr(ctx, x, y, bw, bh, bh / 2);
+      ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, x + bw / 2, y + bh / 2 + 1);
+      ctx.textAlign = "left";
+      ctx.restore();
+    };
+
+    if (s.style === "reserved") {
+      cornerBadge("ຮັບຈອງແລ້ວ • RESERVED", s.accent);
+      brandBar(s.bg, s.accent);
+    }
+
+    if (s.style === "hotDeal") {
+      cornerBadge("🔥 ດ່ວນ! ລາຄາພິເສດ", s.accent);
+      brandBar(s.bg, s.accent);
+    }
+
+    if (s.style === "newListing") {
+      cornerBadge("ໃໝ່ • NEW", s.accent);
+      brandBar(s.bg, s.accent);
+    }
+
+    if (s.style === "logoCornerName") {
+      // logo top-left + small name; brand bar bottom
+      const ls = W * 0.14;
+      ctx.save();
+      ctx.shadowColor = "rgba(0,0,0,0.5)";
+      ctx.shadowBlur = 10;
+      drawLogo(pad, pad, ls);
+      ctx.restore();
+      brandBar(s.bg, s.accent);
+    }
+
+    if (s.style === "sideBarLeft" || s.style === "sideBarRight") {
+      const barW = Math.round(W * 0.13);
+      const left = s.style === "sideBarLeft";
+      const x = left ? 0 : W - barW;
+      ctx.fillStyle = s.bg;
+      ctx.fillRect(x, 0, barW, H);
+      ctx.fillStyle = s.accent;
+      ctx.fillRect(left ? barW - 5 : x, 0, 5, H);
+      // vertical text
+      ctx.save();
+      ctx.translate(x + barW / 2, H / 2);
+      ctx.rotate(left ? -Math.PI / 2 : Math.PI / 2);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = s.accent;
+      ctx.font = `700 ${Math.round(barW * 0.36)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText(BRAND.nameLao, 0, -barW * 0.16);
+      ctx.fillStyle = "#fff";
+      ctx.font = `600 ${Math.round(barW * 0.26)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText(BRAND.nameEn, 0, barW * 0.18);
+      ctx.restore();
+      // logo + phone at the bottom of the bar
+      const ls = barW * 0.6;
+      drawLogo(x + (barW - ls) / 2, H - ls - pad, ls);
+      ctx.textAlign = "left";
+    }
+
+    if (s.style === "minimal") {
+      // subtle logo + one-line text bottom-left, no heavy bar
+      ctx.save();
+      ctx.shadowColor = "rgba(0,0,0,0.6)";
+      ctx.shadowBlur = 10;
+      const ls = W * 0.1;
+      const y = H - ls - pad;
+      drawLogo(pad, y, ls);
+      ctx.fillStyle = "#fff";
+      ctx.textBaseline = "middle";
+      ctx.font = `700 ${Math.round(W * 0.03)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText(BRAND.nameLao, pad + ls + 16, y + ls * 0.32);
+      ctx.font = `500 ${Math.round(W * 0.024)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText("☎ " + phoneText, pad + ls + 16, y + ls * 0.72);
+      ctx.restore();
+    }
+
+    if (s.style === "urgentGradient") {
+      cornerBadge("ຂາຍດ່ວນ • URGENT", "#dc2626");
+      const barH = Math.round(H * 0.15);
+      const y = H - barH;
+      const g = ctx.createLinearGradient(0, 0, W, 0);
+      g.addColorStop(0, "#dc2626");
+      g.addColorStop(1, "#f97316");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, y, W, barH);
+      const ls = barH * 0.66;
+      drawLogo(pad, y + (barH - ls) / 2, ls);
+      const tx = pad + ls + pad * 0.6;
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#fff";
+      ctx.font = `700 ${Math.round(barH * 0.27)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText(BRAND.nameLao, tx, y + barH * 0.34);
+      ctx.font = `600 ${Math.round(barH * 0.21)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText(BRAND.nameEn, tx, y + barH * 0.63);
+      ctx.font = `500 ${Math.round(barH * 0.19)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText("☎ " + phoneText, tx, y + barH * 0.87);
+    }
+
+    if (s.style === "luxuryGold") {
+      // thin gold frame + elegant bottom bar
+      const m = Math.round(W * 0.022);
+      ctx.strokeStyle = s.accent;
+      ctx.lineWidth = 3;
+      ctx.strokeRect(m, m, W - m * 2, H - m * 2);
+      ctx.lineWidth = 1;
+      ctx.strokeRect(m + 8, m + 8, W - (m + 8) * 2, H - (m + 8) * 2);
+      brandBar("rgba(6,16,30,0.72)", s.accent);
+    }
+
+    if (s.style === "contactCard") {
+      const cw = Math.round(W * 0.5);
+      const ch = Math.round(H * 0.2);
+      const x = pad;
+      const y = H - ch - pad;
+      ctx.fillStyle = s.bg;
+      rr(ctx, x, y, cw, ch, 20);
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = s.accent;
+      ctx.stroke();
+      const ls = ch * 0.58;
+      drawLogo(x + 16, y + (ch - ls) / 2, ls);
+      const tx = x + 16 + ls + 14;
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "left";
+      ctx.fillStyle = s.accent;
+      ctx.font = `700 ${Math.round(ch * 0.2)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText(BRAND.nameLao, tx, y + ch * 0.3);
+      ctx.fillStyle = "#fff";
+      ctx.font = `500 ${Math.round(ch * 0.16)}px 'Noto Sans Lao', sans-serif`;
+      ctx.fillText("☎ " + BRAND.phones[0], tx, y + ch * 0.58);
+      ctx.fillText("☎ " + BRAND.phones[1], tx, y + ch * 0.82);
+    }
   }, [photo, logo, tpl, fontReady]);
 
   useEffect(() => {
@@ -394,8 +695,7 @@ export default function Watermark() {
   };
 
   return (
-    <div className="fade-up">
-      <StatusBar />
+    <div className="fade-up pt-3">
       <div className="px-5 pt-4 flex items-center gap-3">
         <button
           onClick={() => navigate(-1)}
@@ -406,7 +706,7 @@ export default function Watermark() {
         </button>
         <div className="text-center flex-1">
           <h1 className="text-lg font-bold text-white">ໃສ່ລາຍນ້ຳ (Watermark)</h1>
-          <p className="text-[11px] text-brand-400">11 ຮູບແບບ ໃຫ້ເລືອກໃຊ້</p>
+          <p className="text-[11px] text-brand-400">{TEMPLATES.length} ຮູບແບບ ໃຫ້ເລືອກໃຊ້</p>
         </div>
         <div className="w-8" />
       </div>

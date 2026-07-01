@@ -21,7 +21,7 @@ import {
   Droplet,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { StatusBar, PageHeader } from "../components/Shell";
+import { PageHeader } from "../components/Shell";
 import { perfData } from "../data/seed";
 
 const features = [
@@ -41,8 +41,7 @@ const features = [
 export default function More() {
   const navigate = useNavigate();
   return (
-    <div className="fade-up">
-      <StatusBar />
+    <div className="fade-up pt-3">
       <PageHeader subtitle="Khopkhua Realestate" title="ເພີ່ມເຕີມ" badge={0} />
 
       {/* Performance */}
