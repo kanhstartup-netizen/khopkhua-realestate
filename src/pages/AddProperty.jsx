@@ -56,6 +56,7 @@ export default function AddProperty() {
   const [locating, setLocating] = useState(false);
   const [done, setDone] = useState(false);
   const [images, setImages] = useState([]); // data URLs of uploaded photos
+  const [watermarked, setWatermarked] = useState([]); // data URLs with watermark
 
   const onPickImages = (e) => {
     const files = Array.from(e.target.files || []);
@@ -70,8 +71,10 @@ export default function AddProperty() {
     e.target.value = "";
   };
 
-  const removeImage = (idx) =>
+  const removeImage = (idx) => {
     setImages((prev) => prev.filter((_, i) => i !== idx));
+    setWatermarked([]);
+  };
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
@@ -125,9 +128,9 @@ export default function AddProperty() {
       mapUrl: form.mapUrl,
       coords,
       status: "ກຳລັງຂາຍ",
-      images: images,
+      images: watermarked.length ? watermarked : images,
       img:
-        images[0] ||
+        (watermarked.length ? watermarked[0] : images[0]) ||
         sampleImgs[Math.floor(Math.random() * sampleImgs.length)],
     });
     setDone(true);
@@ -218,7 +221,11 @@ export default function AddProperty() {
         )}
 
         {/* Inline watermark picker */}
-        <WatermarkPicker images={images} />
+        <WatermarkPicker
+          images={images}
+          mode="compose"
+          onComposed={setWatermarked}
+        />
       </div>
 
       {/* Form */}

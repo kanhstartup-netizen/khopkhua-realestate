@@ -10,7 +10,15 @@ const LOGO_SRC = `${import.meta.env.BASE_URL}logo.png`;
  * Props:
  *  - images: array of data URLs (uploaded photos)
  */
-export default function WatermarkPicker({ images = [] }) {
+/**
+ * Inline watermark picker.
+ * Props:
+ *  - images: array of data URLs (uploaded photos)
+ *  - mode: "download" (save to device) | "compose" (return watermarked data URLs)
+ *  - onComposed: (dataUrls[]) => void  — called in compose mode
+ *  - onChange: (tpl) => void  — notifies parent of selected template (optional)
+ */
+export default function WatermarkPicker({ images = [], mode = "download", onComposed }) {
   const canvasRef = useRef(null);
   const [photos, setPhotos] = useState([]); // HTMLImageElement[]
   const [activeImg, setActiveImg] = useState(0);
@@ -65,6 +73,31 @@ export default function WatermarkPicker({ images = [] }) {
   const prevTpl = () => setTplIdx((i) => (i - 1 + TEMPLATES.length) % TEMPLATES.length);
   const nextTpl = () => setTplIdx((i) => (i + 1) % TEMPLATES.length);
 
+  // Generate watermarked data URLs for all photos with the current template
+  const composeAll = useCallback(async () => {
+    const off = document.createElement("canvas");
+    const out = [];
+    for (let i = 0; i < photos.length; i++) {
+      drawWatermark(off, photos[i], tpl, logo);
+      await new Promise((r) => setTimeout(r, 10));
+      out.push(off.toDataURL("image/jpeg", 0.92));
+    }
+    return out;
+  }, [photos, tpl, logo]);
+
+  // In compose mode, report watermarked images to the parent whenever they change
+  useEffect(() => {
+    if (mode !== "compose" || !onComposed || !photos.length || !fontReady) return;
+    let alive = true;
+    composeAll().then((urls) => {
+      if (alive) onComposed(urls);
+    });
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [photos, tpl, logo, fontReady, mode]);
+
   const downloadAll = async () => {
     if (!photos.length) return;
     setDownloading(true);
@@ -91,7 +124,7 @@ export default function WatermarkPicker({ images = [] }) {
   return (
     <div className="card p-3 mt-3">
       <p className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
-        💧 ໃສ່ລາຍນ້ຳ ກ່ອນໂພສ
+        💧 ໃສ່ລາຍນ້ຳ {mode === "compose" ? "ກ່ອນໂພສລົງແອັບ" : "ກ່ອນໂພສ"}
       </p>
 
       {/* Preview */}
@@ -154,29 +187,37 @@ export default function WatermarkPicker({ images = [] }) {
         ))}
       </div>
 
-      {/* Download / post */}
-      <button
-        onClick={downloadAll}
-        disabled={downloading}
-        className="w-full gradient-btn py-3 rounded-2xl mt-3 flex items-center justify-center gap-2 text-white font-semibold active:scale-95 hover:brightness-110 transition shadow-glow disabled:opacity-60"
-      >
-        {done ? (
-          <>
-            <Check size={18} /> ດາວໂຫລດສຳເລັດ!
-          </>
-        ) : downloading ? (
-          <>
-            <Download size={18} className="animate-bounce" /> ກຳລັງດາວໂຫລດ...
-          </>
-        ) : (
-          <>
-            <Download size={18} /> ໃສ່ລາຍນ້ຳ + ດາວໂຫລດ ({photos.length} ຮູບ)
-          </>
-        )}
-      </button>
-      <p className="text-center text-[10px] text-white/40 mt-1.5">
-        ຮູບຈະບັນທຶກລົງໂທລະສັບ ພ້ອມໂພສ Facebook / TikTok
-      </p>
+      {/* Download button (download mode only) */}
+      {mode === "download" ? (
+        <>
+          <button
+            onClick={downloadAll}
+            disabled={downloading}
+            className="w-full gradient-btn py-3 rounded-2xl mt-3 flex items-center justify-center gap-2 text-white font-semibold active:scale-95 hover:brightness-110 transition shadow-glow disabled:opacity-60"
+          >
+            {done ? (
+              <>
+                <Check size={18} /> ດາວໂຫລດສຳເລັດ!
+              </>
+            ) : downloading ? (
+              <>
+                <Download size={18} className="animate-bounce" /> ກຳລັງດາວໂຫລດ...
+              </>
+            ) : (
+              <>
+                <Download size={18} /> ໃສ່ລາຍນ້ຳ + ດາວໂຫລດ ({photos.length} ຮູບ)
+              </>
+            )}
+          </button>
+          <p className="text-center text-[10px] text-white/40 mt-1.5">
+            ຮູບຈະບັນທຶກລົງໂທລະສັບ ພ້ອມໂພສ Facebook / TikTok
+          </p>
+        </>
+      ) : (
+        <p className="text-center text-[11px] text-brand-400 mt-3">
+          ✓ ເລືອກລາຍນ້ຳແລ້ວ — ກົດ "ບັນທຶກຊັບສິນ" ລຸ່ມສຸດ ເພື່ອໂພສລົງແອັບ
+        </p>
+      )}
     </div>
   );
 }
