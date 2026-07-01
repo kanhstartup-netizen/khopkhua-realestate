@@ -25,8 +25,11 @@ export default function PropertyDetail() {
   const { properties } = useStore();
   const [copied, setCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [activeImg, setActiveImg] = useState(0);
 
   const p = properties.find((x) => x.id === id);
+
+  const gallery = (p && p.images && p.images.length ? p.images : p ? [p.img] : []);
 
   if (!p) {
     return (
@@ -84,7 +87,7 @@ ${p.mapUrl ? `\n🗺 ${p.mapUrl}` : ""}
     <div className="fade-up pt-3 pb-4">
       {/* Hero image */}
       <div className="relative">
-        <img src={p.img} alt={p.name} className="w-full h-64 object-cover" />
+        <img src={gallery[activeImg] || p.img} alt={p.name} className="w-full h-64 object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-black/30" />
         <button
           onClick={() => navigate(-1)}
@@ -119,6 +122,23 @@ ${p.mapUrl ? `\n🗺 ${p.mapUrl}` : ""}
           <MapPin size={14} className="text-brand-400" /> {p.location}
         </p>
         <p className="text-2xl gold-text font-extrabold mt-2">{fmtLAK(p.price)}</p>
+
+        {/* Gallery thumbnails */}
+        {gallery.length > 1 && (
+          <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
+            {gallery.map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt=""
+                onClick={() => setActiveImg(i)}
+                className={`w-16 h-16 rounded-xl object-cover cursor-pointer shrink-0 transition-all ${
+                  activeImg === i ? "ring-2 ring-brand-400 scale-105" : "opacity-70"
+                }`}
+              />
+            ))}
+          </div>
+        )}
 
         {/* stats */}
         <div className="grid grid-cols-3 gap-3 mt-4">
