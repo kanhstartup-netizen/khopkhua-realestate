@@ -1,4 +1,11 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { ChevronLeft, ChevronRight, Download, Check } from "lucide-react";
 import { TEMPLATES } from "../data/watermarks";
 import { drawWatermark, loadImg } from "../lib/watermark";
@@ -9,16 +16,15 @@ const LOGO_SRC = `${import.meta.env.BASE_URL}logo.png`;
  * Inline watermark picker.
  * Props:
  *  - images: array of data URLs (uploaded photos)
- */
-/**
- * Inline watermark picker.
- * Props:
- *  - images: array of data URLs (uploaded photos)
  *  - mode: "download" (save to device) | "compose" (return watermarked data URLs)
- *  - onComposed: (dataUrls[]) => void  — called in compose mode
- *  - onChange: (tpl) => void  — notifies parent of selected template (optional)
+ *  - onComposed: (dataUrls[]) => void  — called in compose mode on template change
+ * Ref methods:
+ *  - composeNow(): Promise<dataUrls[]>  — compose all images right now (used at save time)
  */
-export default function WatermarkPicker({ images = [], mode = "download", onComposed }) {
+const WatermarkPicker = forwardRef(function WatermarkPicker(
+  { images = [], mode = "download", onComposed },
+  ref
+) {
   const canvasRef = useRef(null);
   const [photos, setPhotos] = useState([]); // HTMLImageElement[]
   const [activeImg, setActiveImg] = useState(0);
@@ -79,15 +85,27 @@ export default function WatermarkPicker({ images = [], mode = "download", onComp
     const out = [];
     for (let i = 0; i < photos.length; i++) {
       drawWatermark(off, photos[i], tpl, logo);
-      await new Promise((r) => setTimeout(r, 10));
+      // give the canvas a moment to paint (text + logo) before capturing
+      await new Promise((r) => setTimeout(r, 40));
       out.push(off.toDataURL("image/jpeg", 0.92));
     }
     return out;
   }, [photos, tpl, logo]);
 
-  // In compose mode, report watermarked images to the parent whenever they change
+  // Expose a compose method the parent can call at save time (guarantees fresh watermark)
+  useImperativeHandle(ref, () => ({
+    composeNow: async () => {
+      if (!photos.length) return [];
+      return composeAll();
+    },
+    hasImages: () => photos.length > 0,
+  }));
+
+  // In compose mode, report watermarked images to the parent whenever they change.
+  // Wait until BOTH the logo image and Lao font are ready, or the watermark is incomplete.
   useEffect(() => {
-    if (mode !== "compose" || !onComposed || !photos.length || !fontReady) return;
+    if (mode !== "compose" || !onComposed || !photos.length) return;
+    if (!logo || !fontReady) return; // logo/font not ready yet -> skip, will re-run when ready
     let alive = true;
     composeAll().then((urls) => {
       if (alive) onComposed(urls);
@@ -220,4 +238,6 @@ export default function WatermarkPicker({ images = [], mode = "download", onComp
       )}
     </div>
   );
-}
+});
+
+export default WatermarkPicker;

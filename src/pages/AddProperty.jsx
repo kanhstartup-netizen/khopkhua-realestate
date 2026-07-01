@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ChevronLeft,
@@ -57,6 +57,7 @@ export default function AddProperty() {
   const [done, setDone] = useState(false);
   const [images, setImages] = useState([]); // data URLs of uploaded photos
   const [watermarked, setWatermarked] = useState([]); // data URLs with watermark
+  const wmRef = useRef(null);
 
   const onPickImages = (e) => {
     const files = Array.from(e.target.files || []);
@@ -114,8 +115,21 @@ export default function AddProperty() {
     ? `https://maps.google.com/maps?q=${coords.lat},${coords.lng}&z=15&output=embed`
     : null;
 
-  const save = () => {
+  const save = async () => {
     if (!form.name.trim()) return;
+
+    // Compose watermarked images NOW to guarantee they're applied
+    let finalImages = images;
+    if (images.length && wmRef.current) {
+      try {
+        const composed = await wmRef.current.composeNow();
+        if (composed && composed.length) finalImages = composed;
+      } catch {
+        // fall back to already-composed state or raw
+        if (watermarked.length) finalImages = watermarked;
+      }
+    }
+
     addProperty({
       type,
       name: form.name,
@@ -128,9 +142,9 @@ export default function AddProperty() {
       mapUrl: form.mapUrl,
       coords,
       status: "ກຳລັງຂາຍ",
-      images: watermarked.length ? watermarked : images,
+      images: finalImages,
       img:
-        (watermarked.length ? watermarked[0] : images[0]) ||
+        finalImages[0] ||
         sampleImgs[Math.floor(Math.random() * sampleImgs.length)],
     });
     setDone(true);
@@ -222,6 +236,7 @@ export default function AddProperty() {
 
         {/* Inline watermark picker */}
         <WatermarkPicker
+          ref={wmRef}
           images={images}
           mode="compose"
           onComposed={setWatermarked}
