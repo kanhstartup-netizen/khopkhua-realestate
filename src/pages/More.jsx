@@ -19,10 +19,15 @@ import {
   Smartphone,
   Settings,
   Droplet,
+  LogOut,
+  UserPlus,
+  ShieldCheck,
+  UserCircle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "../components/Shell";
 import { perfData } from "../data/seed";
+import { useAuth } from "../context/Auth";
 
 const features = [
   { icon: Building2, label: "ຈັດການຊັບສິນ", color: "#8b5cf6", to: "/properties" },
@@ -40,9 +45,60 @@ const features = [
 
 export default function More() {
   const navigate = useNavigate();
+  const { user, admin, firebaseEnabled, logout } = useAuth();
   return (
     <div className="fade-up pt-3">
       <PageHeader subtitle="Khopkhua Realestate" title="ເພີ່ມເຕີມ" badge={0} />
+
+      {/* Account card (ສະເພາະເມື່ອໃຊ້ Firebase + login ແລ້ວ) */}
+      {firebaseEnabled && user && (
+        <div className="px-5 mt-4">
+          <div className="card p-4">
+            <div className="flex items-center gap-3">
+              {user.photoURL ? (
+                <img
+                  src={user.photoURL}
+                  alt=""
+                  className="w-11 h-11 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-11 h-11 rounded-full bg-brand-500/15 flex items-center justify-center">
+                  <UserCircle size={24} className="text-brand-400" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-white truncate">
+                  {user.displayName || user.email}
+                </p>
+                <p className="text-[11px] text-white/50 flex items-center gap-1">
+                  {admin && (
+                    <span className="inline-flex items-center gap-0.5 text-emerald-400">
+                      <ShieldCheck size={11} /> Admin ·
+                    </span>
+                  )}
+                  <span className="truncate">{user.email}</span>
+                </p>
+              </div>
+            </div>
+            <div className="mt-3 flex gap-2">
+              {admin && (
+                <button
+                  onClick={() => navigate("/add-staff")}
+                  className="flex-1 text-xs py-2 rounded-xl bg-white/8 hover:bg-white/12 text-white/85 font-medium flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+                >
+                  <UserPlus size={14} /> ເພີ່ມພະນັກງານ
+                </button>
+              )}
+              <button
+                onClick={logout}
+                className="flex-1 text-xs py-2 rounded-xl bg-rose-500/12 hover:bg-rose-500/20 text-rose-300 font-medium flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+              >
+                <LogOut size={14} /> ອອກຈາກລະບົບ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Performance */}
       <div className="px-5 mt-4">
