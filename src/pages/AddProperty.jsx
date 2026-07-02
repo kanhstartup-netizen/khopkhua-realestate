@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   ChevronLeft,
   UploadCloud,
@@ -9,9 +9,13 @@ import {
   Link2,
   Loader2,
   X,
+  Sparkles,
+  Copy,
+  Share2,
 } from "lucide-react";
 import { useStore } from "../context/Store";
-import { CURRENCIES } from "../data/seed";
+import { CURRENCIES, fmtMoney } from "../data/seed";
+import { hasApiKey, sendToClaude } from "../lib/ai";
 import WatermarkPicker from "../components/WatermarkPicker";
 
 const types = [
@@ -59,6 +63,9 @@ export default function AddProperty() {
   const [done, setDone] = useState(false);
   const [images, setImages] = useState([]); // data URLs of uploaded photos
   const [watermarked, setWatermarked] = useState([]); // data URLs with watermark
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiError, setAiError] = useState("");
+  const [copied, setCopied] = useState(false);
   const wmRef = useRef(null);
 
   const onPickImages = (e) => {
@@ -116,6 +123,74 @@ export default function AddProperty() {
   const mapSrc = coords
     ? `https://maps.google.com/maps?q=${coords.lat},${coords.lng}&z=15&output=embed`
     : null;
+
+  const typeLabel = types.find((t) => t.key === type)?.label || "ຊັບສິນ";
+
+  // ໃຫ້ AI ຂຽນແຄັບຊັ່ນ Facebook ຈາກຂໍ້ມູນທີ່ໃສ່ໄວ້
+  const generateCaption = async () => {
+    if (aiBusy) return;
+    if (!hasApiKey()) {
+      setAiError("NO_KEY");
+      return;
+    }
+    if (!form.name.trim() && !form.location.trim()) {
+      setAiError("ກະລຸນາໃສ່ຢ່າງໜ້ອຍ ຊື່ຊັບສິນ ຫລືທຳເລ ກ່ອນ");
+      return;
+    }
+    setAiError("");
+    setAiBusy(true);
+
+    // ລວມຂໍ້ມູນທີ່ມີ
+    const priceText = form.price
+      ? fmtMoney(Number(form.price), form.currency)
+      : "ຍັງບໍ່ໄດ້ລະບຸ";
+    const facts = [
+      `ປະເພດ: ${typeLabel}`,
+      form.name && `ຊື່ຊັບສິນ: ${form.name}`,
+      form.location && `ທຳເລ: ${form.location}`,
+      form.price && `ລາຄາ: ${priceText}`,
+      form.area && `ເນື້ອທີ່: ${form.area} m²`,
+      (type === "house" || type === "building") && form.beds && `ຫ້ອງນອນ: ${form.beds}`,
+      (type === "house" || type === "building") && form.baths && `ຫ້ອງນ້ຳ: ${form.baths}`,
+      form.desc && `ລາຍລະອຽດເດີມ: ${form.desc}`,
+      form.mapUrl && `ມີແຜນທີ່: ແມ່ນ`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    const systemPrompt =
+      "ເຈົ້າແມ່ນນັກຂຽນ content ການຕະຫລາດອະສັງຫາລິມະຊັບມືອາຊີບຂອງບໍລິສັດ Khopkhua Realestate ໃນລາວ. ໜ້າທີ່: ຂຽນແຄັບຊັ່ນໂພສ Facebook ຂາຍຊັບສິນເປັນພາສາລາວ ໃຫ້ອ່ານມ່ວນ ດຶງດູດ ແລະ ເປັນມືອາຊີບ. ກົດ: (1) ໃຊ້ອີໂມຈິທີ່ເໝາະສົມແຊກໃນເນື້ອຫາໃຫ້ສວຍງາມ ແຕ່ຢ່າໃຊ້ຫລາຍເກີນໄປ, (2) ຈັດວັກ/ບັນທັດໃຫ້ອ່ານງ່າຍ (ໃຊ້ bullet ▪️ ຫລື • ສຳລັບຈຸດເດັ່ນ), (3) ຂຽນຄຳເຊີນຊວນ (call to action) ໃຫ້ຕິດຕໍ່, (4) ຈົບດ້ວຍ hashtag ພາສາລາວ/ອັງກິດທີ່ກ່ຽວຂ້ອງ 5-8 ອັນ. ຕອບເປັນແຄັບຊັ່ນທີ່ພ້ອມ copy ໄປໂພສເລີຍ ບໍ່ຕ້ອງມີຄຳອະທິບາຍນຳ ຫລືຄຳວ່າ 'ນີ້ແມ່ນແຄັບຊັ່ນ' — ໃຫ້ຕອບແຕ່ຕົວແຄັບຊັ່ນເລີຍ.";
+
+    try {
+      const reply = await sendToClaude(
+        [
+          {
+            role: "user",
+            content: `ຂຽນແຄັບຊັ່ນໂພສ Facebook ຂາຍຊັບສິນນີ້ໃຫ້ແດ່:\n\n${facts}`,
+          },
+        ],
+        systemPrompt
+      );
+      setForm((f) => ({ ...f, desc: reply.trim() }));
+    } catch (e) {
+      if (e.code === "BAD_KEY") setAiError("API key ບໍ່ຖືກຕ້ອງ ຫລືໝົດອາຍຸ");
+      else if (e.code === "NO_API_KEY") setAiError("NO_KEY");
+      else setAiError(e.message || "ສ້າງແຄັບຊັ່ນບໍ່ສຳເລັດ, ລອງໃໝ່");
+    } finally {
+      setAiBusy(false);
+    }
+  };
+
+  const copyDesc = () => {
+    if (!form.desc.trim()) return;
+    navigator.clipboard
+      ?.writeText(form.desc)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1800);
+      })
+      .catch(() => {});
+  };
 
   const save = async () => {
     if (!form.name.trim()) return;
@@ -342,9 +417,74 @@ export default function AddProperty() {
             </Field>
           </div>
         )}
-        <Field label="ລາຍລະອຽດ">
-          <textarea value={form.desc} onChange={set("desc")} rows={2} placeholder="ດິນສວຍ ທຳເລດີ ໃກ້ທາງໃຫຍ່..." className={inp} />
-        </Field>
+        {/* ລາຍລະອຽດ + AI */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs text-white/55">ລາຍລະອຽດ / ແຄັບຊັ່ນ Facebook</label>
+            <button
+              type="button"
+              onClick={generateCaption}
+              disabled={aiBusy}
+              className="text-[11px] font-semibold px-2.5 py-1 rounded-lg gradient-btn text-white flex items-center gap-1 active:scale-95 transition-transform disabled:opacity-60"
+            >
+              {aiBusy ? (
+                <>
+                  <Loader2 size={12} className="animate-spin" /> ກຳລັງຂຽນ...
+                </>
+              ) : (
+                <>
+                  <Sparkles size={12} /> ໃຫ້ AI ຂຽນໃຫ້
+                </>
+              )}
+            </button>
+          </div>
+          <textarea
+            value={form.desc}
+            onChange={set("desc")}
+            rows={form.desc ? 8 : 3}
+            placeholder="ດິນສວຍ ທຳເລດີ ໃກ້ທາງໃຫຍ່... (ຫລືກົດ 'ໃຫ້ AI ຂຽນໃຫ້' ຫລັງໃສ່ຂໍ້ມູນຂ້າງເທິງແລ້ວ)"
+            className={inp}
+          />
+
+          {aiError === "NO_KEY" ? (
+            <p className="text-[10px] text-amber-400 mt-1.5 flex items-center gap-1">
+              ຍັງບໍ່ໄດ້ໃສ່ Claude API key —{" "}
+              <Link to="/settings" className="underline">
+                ຕັ້ງຄ່າດຽວນີ້
+              </Link>
+            </p>
+          ) : aiError ? (
+            <p className="text-[10px] text-rose-400 mt-1.5">{aiError}</p>
+          ) : null}
+
+          {/* ປຸ່ມ copy / share ຫລັງມີເນື້ອຫາ */}
+          {form.desc.trim() && (
+            <>
+              <div className="flex gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={copyDesc}
+                  className="flex-1 text-[11px] py-2 rounded-xl bg-white/8 hover:bg-white/12 text-white/85 font-medium flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+                >
+                  {copied ? <Check size={13} /> : <Copy size={13} />}
+                  {copied ? "ຄັດລອກແລ້ວ" : "ຄັດລອກແຄັບຊັ່ນ"}
+                </button>
+                <a
+                  href="https://www.facebook.com/"
+                  onClick={copyDesc}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 text-[11px] py-2 rounded-xl bg-[#1877f2]/20 hover:bg-[#1877f2]/30 text-[#4c9aff] font-medium flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+                >
+                  <Share2 size={13} /> ຄັດລອກ + ເປີດເຟສ
+                </a>
+              </div>
+              <p className="text-[9px] text-white/35 mt-1.5 text-center">
+                ກົດ "ຄັດລອກ + ເປີດເຟສ" ແລ້ວວາງ (paste) ແຄັບຊັ່ນ ພ້ອມຮູບ ໃນຊ່ອງໂພສ Facebook
+              </p>
+            </>
+          )}
+        </div>
       </div>
 
       <div className="px-5 mt-5">
